@@ -1,0 +1,71 @@
+@model Gimnasio.Models.ViewModels.UsuarioViewModel
+
+@{
+    ViewData["Title"] = "Eliminar usuario";
+}
+
+<h1>Eliminar usuario</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div class="alert alert-warning">
+            ¿Estás seguro de que querés eliminar este usuario?
+            Esta acción no se puede deshacer.
+        </div>
+
+        <dl class="row">
+
+            <dt class="col-sm-3">
+                Nombre
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Nombre @Model.Apellido
+            </dd>
+
+            <dt class="col-sm-3">
+                Email
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Email
+            </dd>
+
+            <dt class="col-sm-3">
+                Teléfono
+            </dt>
+
+            <dd class="col-sm-9">
+                @(string.IsNullOrWhiteSpace(Model.Telefono)
+                    ? "-"
+                    : Model.Telefono)
+            </dd>
+
+        </dl>
+
+        <form asp-action="EliminarConfirmado" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   asp-for="Id" />
+
+            <button type="submit"
+                    class="btn btn-danger">
+                Sí, eliminar
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Cancelar
+            </a>
+
+        </form>
+
+    </div>
+
+</div>

@@ -1,0 +1,73 @@
+@model Gimnasio.Models.ViewModels.UsuarioViewModel
+
+@{
+    ViewData["Title"] = "Detalles del usuario";
+}
+
+<h1>Detalles del usuario</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-3">
+                Nombre
+            </dt>
+            <dd class="col-sm-9">
+                @Model.Nombre
+            </dd>
+
+            <dt class="col-sm-3">
+                Apellido
+            </dt>
+            <dd class="col-sm-9">
+                @Model.Apellido
+            </dd>
+
+            <dt class="col-sm-3">
+                Email
+            </dt>
+            <dd class="col-sm-9">
+                @Model.Email
+            </dd>
+
+            <dt class="col-sm-3">
+                Teléfono
+            </dt>
+            <dd class="col-sm-9">
+                @(string.IsNullOrWhiteSpace(Model.Telefono)
+                    ? "-"
+                    : Model.Telefono)
+            </dd>
+
+            <dt class="col-sm-3">
+                Avatar
+            </dt>
+            <dd class="col-sm-9">
+                @(string.IsNullOrWhiteSpace(Model.Avatar)
+                    ? "Sin avatar"
+                    : Model.Avatar)
+            </dd>
+
+        </dl>
+
+        <div class="mt-4">
+
+            <a asp-action="Editar"
+               asp-route-id="@Model.Id"
+               class="btn btn-warning">
+                Editar
+            </a>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Volver
+            </a>
+
+        </div>
+
+    </div>
+</div>
