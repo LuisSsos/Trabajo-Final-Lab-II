@@ -27,6 +27,11 @@ builder.Services.ConfigureApplicationCookie(opciones =>
 
 var app = builder.Build();
 
+using (var alcance = app.Services.CreateScope())
+{
+    await SemillaDatos.InicializarAsync(alcance.ServiceProvider);
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

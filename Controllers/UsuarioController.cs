@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Gimnasio.Controllers;
 
-[Authorize]
+[Authorize(Roles = Roles.Administrador)]
 public class UsuarioController : Controller
 {
     private readonly UserManager<Usuario> _userManager;
