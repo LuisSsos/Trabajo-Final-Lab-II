@@ -25,4 +25,12 @@ public class UsuarioViewModel
     public string? Password { get; set; }
 
     public string? Avatar { get; set; }
+
+    public string Rol { get; set; } = string.Empty;
+
+    [DataType(DataType.Date)]
+    public DateTime? FechaNacimiento { get; set; }
+
+    [StringLength(80)]
+    public string? Cargo { get; set; }
 }

@@ -39,15 +39,40 @@ public class UsuarioController : Controller
         return View();
     }
 
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Crear(UsuarioViewModel modelo)
     {
         if (string.IsNullOrWhiteSpace(modelo.Password))
         {
-            ModelState.AddModelError(
-                nameof(modelo.Password),
-                "La contraseña es obligatoria.");
+            ModelState.AddModelError(nameof(modelo.Password), "Tenes que ingresar una contrasena.");
+        }
+
+        if (modelo.Rol != Roles.Administrador && modelo.Rol != Roles.Empleado && modelo.Rol != Roles.Cliente)
+        {
+            ModelState.AddModelError(nameof(modelo.Rol), "Elegi un rol.");
+        }
+
+        if (modelo.Rol == Roles.Cliente)
+        {
+            if (modelo.FechaNacimiento == null)
+            {
+                ModelState.AddModelError(nameof(modelo.FechaNacimiento), "Tenes que ingresar la fecha de nacimiento del cliente.");
+            }
+            else if (modelo.FechaNacimiento.Value.Date > DateTime.Today)
+            {
+                ModelState.AddModelError(nameof(modelo.FechaNacimiento), "La fecha de nacimiento no puede ser posterior a hoy.");
+            }
+            else if (modelo.FechaNacimiento.Value.Date < DateTime.Today.AddYears(-100))
+            {
+                ModelState.AddModelError(nameof(modelo.FechaNacimiento), "La fecha de nacimiento no parece valida.");
+            }
+        }
+
+        if (modelo.Rol == Roles.Empleado && !Cargos.Todos.Contains(modelo.Cargo ?? ""))
+        {
+            ModelState.AddModelError(nameof(modelo.Cargo), "Elegi un cargo de la lista.");
         }
 
         if (!ModelState.IsValid)
@@ -64,14 +89,34 @@ public class UsuarioController : Controller
             Apellido = modelo.Apellido
         };
 
-        var resultado = await _userManager.CreateAsync(
-            usuario,
-            modelo.Password ?? ""
-        );
+        if (modelo.Rol == Roles.Cliente)
+        {
+            usuario.Cliente = new Cliente { FechaNacimiento = modelo.FechaNacimiento!.Value };
+        }
+        else if (modelo.Rol == Roles.Empleado)
+        {
+            usuario.Empleado = new Empleado { Cargo = modelo.Cargo! };
+        }
+
+        var resultado = await _userManager.CreateAsync(usuario, modelo.Password ?? "");
 
         if (resultado.Succeeded)
         {
-            return RedirectToAction(nameof(Index));
+            var resultadoRol = await _userManager.AddToRoleAsync(usuario, modelo.Rol);
+
+            if (resultadoRol.Succeeded)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            await _userManager.DeleteAsync(usuario);
+
+            foreach (var error in resultadoRol.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(modelo);
         }
 
         foreach (var error in resultado.Errors)
@@ -81,6 +126,8 @@ public class UsuarioController : Controller
 
         return View(modelo);
     }
+
+
 
     public async Task<IActionResult> Detalles(int id)
     {

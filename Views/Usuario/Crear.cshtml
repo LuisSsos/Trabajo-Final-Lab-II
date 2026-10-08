@@ -13,64 +13,68 @@
 
         <form asp-action="Crear" method="post">
 
-            @Html.AntiForgeryToken()
-
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3">
-            </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="mb-3">
                 <label asp-for="Nombre" class="form-label"></label>
                 <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre"
-                      class="text-danger"></span>
+                <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Apellido" class="form-label"></label>
                 <input asp-for="Apellido" class="form-control" />
-                <span asp-validation-for="Apellido"
-                      class="text-danger"></span>
+                <span asp-validation-for="Apellido" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email"
-                       type="email"
-                       class="form-control" />
-                <span asp-validation-for="Email"
-                      class="text-danger"></span>
+                <input asp-for="Email" type="email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Telefono" class="form-label"></label>
-                <input asp-for="Telefono"
-                       class="form-control" />
-                <span asp-validation-for="Telefono"
-                      class="text-danger"></span>
+                <input asp-for="Telefono" class="form-control" />
+                <span asp-validation-for="Telefono" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password"
-                       type="password"
-                       class="form-control" />
-                <span asp-validation-for="Password"
-                      class="text-danger"></span>
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Rol" class="form-label"></label>
+                <select asp-for="Rol" class="form-select">
+                    <option value="">-- Elegir rol --</option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Empleado">Empleado</option>
+                    <option value="Cliente">Cliente</option>
+                </select>
+                <span asp-validation-for="Rol" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FechaNacimiento" class="form-label">Fecha de nacimiento (solo clientes)</label>
+                <input asp-for="FechaNacimiento" type="date" class="form-control"
+                       min="@DateTime.Today.AddYears(-100).ToString("yyyy-MM-dd")"
+                       max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Cargo" class="form-label">Cargo (solo empleados)</label>
+                <select asp-for="Cargo" asp-items="new SelectList(Gimnasio.Models.Cargos.Todos)" class="form-select">
+                    <option value="">-- Elegir cargo --</option>
+                </select>
+                <span asp-validation-for="Cargo" class="text-danger"></span>
             </div>
 
             <div class="mt-4">
-
-                <button type="submit"
-                        class="btn btn-primary">
-                    Crear usuario
-                </button>
-
-                <a asp-action="Index"
-                   class="btn btn-secondary">
-                    Cancelar
-                </a>
-
+                <button type="submit" class="btn btn-primary">Crear usuario</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
             </div>
 
         </form>
@@ -82,4 +86,17 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        const selectorRol = document.getElementById("Rol");
+        const campoFecha = document.getElementById("FechaNacimiento").closest(".mb-3");
+        const campoCargo = document.getElementById("Cargo").closest(".mb-3");
+
+        function mostrarCampos() {
+            campoFecha.style.display = selectorRol.value === "Cliente" ? "" : "none";
+            campoCargo.style.display = selectorRol.value === "Empleado" ? "" : "none";
+        }
+
+        selectorRol.addEventListener("change", mostrarCampos);
+        mostrarCampos();
+    </script>
 }
