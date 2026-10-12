@@ -1,11 +1,13 @@
 using Gimnasio.Data;
 using Gimnasio.Models;
+using Gimnasio.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ServicioArchivos>();
 
 var cadenaConexion = builder.Configuration.GetConnectionString("Conexion");
 

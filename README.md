@@ -29,7 +29,9 @@ Un cliente no puede reservar dos veces el mismo horario en la misma fecha: hay u
 
 ## Estructura del proyecto
 
-- **Controllers/**: CuentaController (login y logout), UsuarioController (ABMC de usuarios) y HomeController.
+- - **Controllers/**: CuentaController (login y logout), UsuarioController (ABMC de usuarios con paginado y avatar) y HomeController.
+- **Services/ServicioArchivos.cs**: guarda y borra los archivos subidos (por ahora los avatares).
+- **wwwroot/uploads/**: carpeta donde se guardan los archivos subidos. Se crea sola y no se sube al repositorio.
 - **Data/ContextoDatos.cs**: conecta las clases con la base de datos y define reglas de las tablas.
 - **Data/SemillaDatos.cs**: al arrancar la app crea los roles y el usuario administrador si no existen.
 - **Models/**: las clases de las entidades, los enums (EstadoMembresia, EstadoTurno, MetodoPago) y los roles (Roles.cs).
@@ -135,6 +137,8 @@ Al arrancar, el seeder crea los roles Administrador, Empleado y Cliente, y este 
 - Las contraseñas se guardan hasheadas con Identity.
 
 ## Requisitos mínimos
+- Avatar en los usuarios. Se sube al crear o editar un usuario y se muestra en el listado y en el detalle. Está en `Controllers/UsuarioController.cs` y `Services/ServicioArchivos.cs`.
+- Listado de usuarios con paginado del lado del servidor (10 por página, con `Skip` y `Take`). Está en `Controllers/UsuarioController.cs`.
 
 ### Hecho
 
@@ -143,8 +147,6 @@ Al arrancar, el seeder crea los roles Administrador, Empleado y Cliente, y este 
 - Funcionalidad restringida por rol. Está en `Controllers/UsuarioController.cs`.
 
 ### Pendiente
-
-- Avatar en los usuarios. El campo `Avatar` ya existe en `Models/Usuario.cs`, falta la subida.
 - Uso de archivos además del avatar. Los campos `AptoMedico` (Cliente) y `Comprobante` (Pago) ya están creados, falta la subida.
 - ABM con Vue.js vía AJAX.
 - Listados con paginado del lado del servidor.
@@ -152,8 +154,6 @@ Al arrancar, el seeder crea los roles Administrador, Empleado y Cliente, y este 
 - API con JWT y colección de Postman.
 
 ## Qué falta hacer
-
-- Que al crear un usuario se le asigne un rol y se cree su registro de cliente o empleado.
 - ABMC del resto de las entidades.
-- Avatar y subida de archivos.
-- Paginado, búsqueda AJAX, ABM con Vue.js y API con JWT.
+- Subida de apto médico y comprobante.
+- Búsqueda AJAX, ABM con Vue.js y API con JWT.

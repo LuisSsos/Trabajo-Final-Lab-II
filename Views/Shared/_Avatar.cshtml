@@ -1,0 +1,20 @@
+@model Gimnasio.Models.ViewModels.UsuarioViewModel
+
+@{
+    var tamano = ViewData["Tamano"] ?? 40;
+    var estilo = $"width:{tamano}px;height:{tamano}px;";
+    var inicial = Model.Nombre.Length > 0 ? Model.Nombre.Substring(0, 1).ToUpper() : "?";
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.Avatar))
+{
+    <img src="@Model.Avatar" alt="Avatar de @Model.Nombre" class="rounded-circle"
+         style="@estilo object-fit:cover;" />
+}
+else
+{
+    <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center"
+         style="@estilo">
+        @inicial
+    </div>
+}

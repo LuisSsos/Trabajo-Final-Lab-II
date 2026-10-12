@@ -3,22 +3,45 @@ using Gimnasio.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Gimnasio.Services;
 
 namespace Gimnasio.Controllers;
 
 [Authorize(Roles = Roles.Administrador)]
 public class UsuarioController : Controller
 {
-    private readonly UserManager<Usuario> _userManager;
+    private const int TamanoPagina = 10;
+    private static readonly string[] ExtensionesAvatar = { ".jpg", ".jpeg", ".png", ".webp" };
+    private const long TamanoMaximoAvatar = 2 * 1024 * 1024; 
 
-    public UsuarioController(UserManager<Usuario> userManager)
+    private readonly UserManager<Usuario> _userManager;
+    private readonly ServicioArchivos _archivos;
+
+    public UsuarioController(UserManager<Usuario> userManager, ServicioArchivos archivos)
     {
         _userManager = userManager;
+        _archivos = archivos;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(int pagina = 1)
     {
-        var usuarios = _userManager.Users
+        var total = await _userManager.Users.CountAsync();
+        var totalPaginas = Math.Max(1, (int)Math.Ceiling(total / (double)TamanoPagina));
+
+        if (pagina < 1)
+        {
+            pagina = 1;
+        }
+        else if (pagina > totalPaginas)
+        {
+            pagina = totalPaginas;
+        }
+
+        var usuarios = await _userManager.Users
+            .OrderBy(u => u.Id)
+            .Skip((pagina - 1) * TamanoPagina)
+            .Take(TamanoPagina)
             .Select(u => new UsuarioViewModel
             {
                 Id = u.Id,
@@ -28,9 +51,32 @@ public class UsuarioController : Controller
                 Telefono = u.PhoneNumber,
                 Avatar = u.Avatar
             })
-            .ToList();
+            .ToListAsync();
+
+        ViewBag.PaginaActual = pagina;
+        ViewBag.TotalPaginas = totalPaginas;
 
         return View(usuarios);
+    }
+
+    // Controla que el avatar sea una imagen y no pese mucho
+    private void ValidarAvatar(IFormFile? archivo)
+    {
+        if (archivo == null || archivo.Length == 0)
+        {
+            return;
+        }
+
+        var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
+
+        if (!ExtensionesAvatar.Contains(extension))
+        {
+            ModelState.AddModelError(nameof(UsuarioViewModel.ArchivoAvatar), "El avatar tiene que ser una imagen JPG, PNG o WEBP.");
+        }
+        else if (archivo.Length > TamanoMaximoAvatar)
+        {
+            ModelState.AddModelError(nameof(UsuarioViewModel.ArchivoAvatar), "El avatar no puede pesar mas de 2 MB.");
+        }
     }
 
     [HttpGet]
@@ -75,6 +121,8 @@ public class UsuarioController : Controller
             ModelState.AddModelError(nameof(modelo.Cargo), "Elegi un cargo de la lista.");
         }
 
+        ValidarAvatar(modelo.ArchivoAvatar);
+
         if (!ModelState.IsValid)
         {
             return View(modelo);
@@ -88,6 +136,11 @@ public class UsuarioController : Controller
             Nombre = modelo.Nombre,
             Apellido = modelo.Apellido
         };
+
+        if (modelo.ArchivoAvatar != null && modelo.ArchivoAvatar.Length > 0)
+        {
+            usuario.Avatar = await _archivos.GuardarAsync(modelo.ArchivoAvatar, "avatares");
+        }
 
         if (modelo.Rol == Roles.Cliente)
         {
@@ -110,6 +163,7 @@ public class UsuarioController : Controller
             }
 
             await _userManager.DeleteAsync(usuario);
+            _archivos.Borrar(usuario.Avatar);
 
             foreach (var error in resultadoRol.Errors)
             {
@@ -118,6 +172,8 @@ public class UsuarioController : Controller
 
             return View(modelo);
         }
+
+        _archivos.Borrar(usuario.Avatar);
 
         foreach (var error in resultado.Errors)
         {
@@ -183,6 +239,11 @@ public class UsuarioController : Controller
             return BadRequest();
         }
 
+        
+        ModelState.Remove(nameof(modelo.Rol));
+
+        ValidarAvatar(modelo.ArchivoAvatar);
+
         if (!ModelState.IsValid)
         {
             return View(modelo);
@@ -195,6 +256,13 @@ public class UsuarioController : Controller
             return NotFound();
         }
 
+        var avatarAnterior = usuario.Avatar;
+
+        if (modelo.ArchivoAvatar != null && modelo.ArchivoAvatar.Length > 0)
+        {
+            usuario.Avatar = await _archivos.GuardarAsync(modelo.ArchivoAvatar, "avatares");
+        }
+
         usuario.Nombre = modelo.Nombre;
         usuario.Apellido = modelo.Apellido;
         usuario.Email = modelo.Email;
@@ -205,7 +273,18 @@ public class UsuarioController : Controller
 
         if (resultado.Succeeded)
         {
+            // Si se subio un avatar nuevo, el anterior ya no sirve
+            if (usuario.Avatar != avatarAnterior)
+            {
+                _archivos.Borrar(avatarAnterior);
+            }
+
             return RedirectToAction(nameof(Index));
+        }
+
+        if (usuario.Avatar != avatarAnterior)
+        {
+            _archivos.Borrar(usuario.Avatar);
         }
 
         foreach (var error in resultado.Errors)
@@ -254,6 +333,7 @@ public class UsuarioController : Controller
 
         if (resultado.Succeeded)
         {
+            _archivos.Borrar(usuario.Avatar);
             return RedirectToAction(nameof(Index));
         }
 

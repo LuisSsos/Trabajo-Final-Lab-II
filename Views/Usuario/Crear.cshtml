@@ -11,7 +11,7 @@
 <div class="row">
     <div class="col-md-6">
 
-        <form asp-action="Crear" method="post">
+        <form asp-action="Crear" method="post" enctype="multipart/form-data">
 
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -37,6 +37,12 @@
                 <label asp-for="Telefono" class="form-label"></label>
                 <input asp-for="Telefono" class="form-control" />
                 <span asp-validation-for="Telefono" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ArchivoAvatar" class="form-label">Avatar (opcional)</label>
+                <input asp-for="ArchivoAvatar" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                <span asp-validation-for="ArchivoAvatar" class="text-danger"></span>
             </div>
 
             <div class="mb-3">

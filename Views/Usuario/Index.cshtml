@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Usuarios";
+    int paginaActual = ViewBag.PaginaActual;
+    int totalPaginas = ViewBag.TotalPaginas;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -31,6 +33,7 @@
                     <thead>
                         <tr>
                             <th>Id</th>
+                            <th>Avatar</th>
                             <th>Nombre</th>
                             <th>Email</th>
                             <th>Teléfono</th>
@@ -46,6 +49,10 @@
 
                                 <td>
                                     @usuario.Id
+                                </td>
+
+                                <td>
+                                    <partial name="_Avatar" model="usuario" />
                                 </td>
 
                                 <td>
@@ -90,6 +97,30 @@
                 </table>
 
             </div>
+
+            @if (totalPaginas > 1)
+            {
+                <nav>
+                    <ul class="pagination justify-content-center mb-0 mt-3">
+
+                        <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(paginaActual - 1)">Anterior</a>
+                        </li>
+
+                        @for (var i = 1; i <= totalPaginas; i++)
+                        {
+                            <li class="page-item @(i == paginaActual ? "active" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
+                            </li>
+                        }
+
+                        <li class="page-item @(paginaActual == totalPaginas ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(paginaActual + 1)">Siguiente</a>
+                        </li>
+
+                    </ul>
+                </nav>
+            }
         }
 
     </div>

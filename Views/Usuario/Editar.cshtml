@@ -11,11 +11,12 @@
 <div class="row">
     <div class="col-md-6">
 
-        <form asp-action="Editar" method="post">
+        <form asp-action="Editar" method="post" enctype="multipart/form-data">
 
             @Html.AntiForgeryToken()
 
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Avatar" />
 
             <div asp-validation-summary="ModelOnly"
                  class="text-danger mb-3">
@@ -50,6 +51,19 @@
                        class="form-control" />
                 <span asp-validation-for="Telefono"
                       class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ArchivoAvatar" class="form-label">Avatar</label>
+
+                <div class="mb-2">
+                    @{ ViewData["Tamano"] = 80; }
+                    <partial name="_Avatar" model="Model" />
+                </div>
+
+                <input asp-for="ArchivoAvatar" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                <div class="form-text">Si no elegís una imagen nueva, se mantiene la actual.</div>
+                <span asp-validation-for="ArchivoAvatar" class="text-danger"></span>
             </div>
 
             <button type="submit"

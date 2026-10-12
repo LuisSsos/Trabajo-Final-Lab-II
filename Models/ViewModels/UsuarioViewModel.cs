@@ -26,6 +26,8 @@ public class UsuarioViewModel
 
     public string? Avatar { get; set; }
 
+    public IFormFile? ArchivoAvatar { get; set; }
+
     public string Rol { get; set; } = string.Empty;
 
     [DataType(DataType.Date)]

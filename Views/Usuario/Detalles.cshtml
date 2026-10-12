@@ -47,9 +47,8 @@
                 Avatar
             </dt>
             <dd class="col-sm-9">
-                @(string.IsNullOrWhiteSpace(Model.Avatar)
-                    ? "Sin avatar"
-                    : Model.Avatar)
+                @{ ViewData["Tamano"] = 100; }
+                <partial name="_Avatar" model="Model" />
             </dd>
 
         </dl>
