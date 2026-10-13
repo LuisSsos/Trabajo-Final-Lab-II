@@ -10,7 +10,7 @@
 
 <div class="row">
     <div class="col-md-6">
-
+        <p>¿Es cliente?: @Model.EsCliente</p>
         <form asp-action="Editar" method="post" enctype="multipart/form-data">
 
             @Html.AntiForgeryToken()
@@ -18,46 +18,40 @@
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="Avatar" />
 
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3">
             </div>
 
             <div class="mb-3">
                 <label asp-for="Nombre" class="form-label"></label>
                 <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre"
-                      class="text-danger"></span>
+                <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Apellido" class="form-label"></label>
                 <input asp-for="Apellido" class="form-control" />
-                <span asp-validation-for="Apellido"
-                      class="text-danger"></span>
+                <span asp-validation-for="Apellido" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email"
-                       type="email"
-                       class="form-control" />
-                <span asp-validation-for="Email"
-                      class="text-danger"></span>
+                <input asp-for="Email" type="email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Telefono" class="form-label"></label>
-                <input asp-for="Telefono"
-                       class="form-control" />
-                <span asp-validation-for="Telefono"
-                      class="text-danger"></span>
+                <input asp-for="Telefono" class="form-control" />
+                <span asp-validation-for="Telefono" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="ArchivoAvatar" class="form-label">Avatar</label>
 
                 <div class="mb-2">
-                    @{ ViewData["Tamano"] = 80; }
+                    @{
+                        ViewData["Tamano"] = 80;
+                    }
                     <partial name="_Avatar" model="Model" />
                 </div>
 
@@ -66,13 +60,28 @@
                 <span asp-validation-for="ArchivoAvatar" class="text-danger"></span>
             </div>
 
-            <button type="submit"
-                    class="btn btn-primary">
+            @if (Model.EsCliente)
+            {
+                <div class="mb-3" id="campoAptoMedico">
+                    <label class="form-label" for="ArchivoAptoMedico">
+                        Apto médico (opcional)
+                    </label>
+
+                    <input type="file" id="ArchivoAptoMedico" name="ArchivoAptoMedico" class="form-control"
+                           accept=".pdf,.jpg,.jpeg,.png" />
+
+                    <small class="form-text text-muted">
+                        Formatos permitidos: PDF, JPG y PNG.
+                        Si no elegís un archivo nuevo, se conserva el actual.
+                    </small>
+                </div>
+            }
+
+            <button type="submit" class="btn btn-primary">
                 Guardar cambios
             </button>
 
-            <a asp-action="Index"
-               class="btn btn-secondary">
+            <a asp-action="Index" class="btn btn-secondary">
                 Cancelar
             </a>
 

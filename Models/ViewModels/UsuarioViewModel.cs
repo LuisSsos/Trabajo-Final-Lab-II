@@ -35,4 +35,7 @@ public class UsuarioViewModel
 
     [StringLength(80)]
     public string? Cargo { get; set; }
+
+    public IFormFile? ArchivoAptoMedico { get; set; }
+    public bool EsCliente { get; set; }
 }

@@ -53,10 +53,12 @@
 
             <div class="mb-3">
                 <label asp-for="Rol" class="form-label"></label>
-                <select asp-for="Rol" class="form-select">
+                <select asp-for="Rol" class="form-label form-select">
                     <option value="">-- Elegir rol --</option>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Empleado">Empleado</option>
+                    <option value="Recepcionista">Recepcionista</option>
+                    <option value="Entrenador">Entrenador</option>
+                    <option value="Nutricionista">Nutricionista</option>
+                    <option value="Administrativo">Administrativo</option>
                     <option value="Cliente">Cliente</option>
                 </select>
                 <span asp-validation-for="Rol" class="text-danger"></span>
@@ -69,13 +71,18 @@
                        max="@DateTime.Today.ToString("yyyy-MM-dd")" />
                 <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
             </div>
+            
+            <div class="mb-3" id="campoAptoMedico">
+                <label class="form-label" for="ArchivoAptoMedico">
+                    Apto médico (opcional)
+                </label>
 
-            <div class="mb-3">
-                <label asp-for="Cargo" class="form-label">Cargo (solo empleados)</label>
-                <select asp-for="Cargo" asp-items="new SelectList(Gimnasio.Models.Cargos.Todos)" class="form-select">
-                    <option value="">-- Elegir cargo --</option>
-                </select>
-                <span asp-validation-for="Cargo" class="text-danger"></span>
+                <input type="file" id="ArchivoAptoMedico" name="ArchivoAptoMedico" class="form-control"
+                       accept=".pdf,.jpg,.jpeg,.png" />
+
+                <small class="form-text text-muted">
+                    Formatos permitidos: PDF, JPG y PNG.
+                </small>
             </div>
 
             <div class="mt-4">
@@ -95,11 +102,13 @@
     <script>
         const selectorRol = document.getElementById("Rol");
         const campoFecha = document.getElementById("FechaNacimiento").closest(".mb-3");
-        const campoCargo = document.getElementById("Cargo").closest(".mb-3");
+        const campoAptoMedico = document.getElementById("campoAptoMedico");
 
         function mostrarCampos() {
-            campoFecha.style.display = selectorRol.value === "Cliente" ? "" : "none";
-            campoCargo.style.display = selectorRol.value === "Empleado" ? "" : "none";
+            const esCliente = selectorRol.value === "Cliente";
+
+            campoFecha.style.display = esCliente ? "" : "none";
+            campoAptoMedico.style.display = esCliente ? "" : "none";
         }
 
         selectorRol.addEventListener("change", mostrarCampos);

@@ -8,6 +8,7 @@ public static class Cargos
         "Recepcionista",
         "Administrativo",
         "Nutricionista",
-        "Mantenimiento"
+        "Mantenimiento",
+        "Cliente"
     };
 }

@@ -10,7 +10,7 @@ public static class SemillaDatos
         var gestorRoles = servicios.GetRequiredService<RoleManager<IdentityRole<int>>>();
         var gestorUsuarios = servicios.GetRequiredService<UserManager<Usuario>>();
 
-        foreach (var rol in new[] { Roles.Administrador, Roles.Empleado, Roles.Cliente })
+        foreach (var rol in new[] { Roles.Administrador, Roles.Recepcionista, Roles.Entrenador, Roles.Nutricionista, Roles.Administrativo, Roles.Cliente })
         {
             if (!await gestorRoles.RoleExistsAsync(rol))
                 await gestorRoles.CreateAsync(new IdentityRole<int>(rol));

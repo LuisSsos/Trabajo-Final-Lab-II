@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Gimnasio.Services;
+using Gimnasio.Data;
 
 namespace Gimnasio.Controllers;
 
@@ -13,15 +14,17 @@ public class UsuarioController : Controller
 {
     private const int TamanoPagina = 10;
     private static readonly string[] ExtensionesAvatar = { ".jpg", ".jpeg", ".png", ".webp" };
-    private const long TamanoMaximoAvatar = 2 * 1024 * 1024; 
+    private const long TamanoMaximoAvatar = 2 * 1024 * 1024;
 
     private readonly UserManager<Usuario> _userManager;
     private readonly ServicioArchivos _archivos;
+    private readonly ContextoDatos _contexto;
 
-    public UsuarioController(UserManager<Usuario> userManager, ServicioArchivos archivos)
+    public UsuarioController(UserManager<Usuario> userManager, ServicioArchivos archivos, ContextoDatos contexto)
     {
         _userManager = userManager;
         _archivos = archivos;
+        _contexto = contexto;
     }
 
     public async Task<IActionResult> Index(int pagina = 1)
@@ -95,7 +98,7 @@ public class UsuarioController : Controller
             ModelState.AddModelError(nameof(modelo.Password), "Tenes que ingresar una contrasena.");
         }
 
-        if (modelo.Rol != Roles.Administrador && modelo.Rol != Roles.Empleado && modelo.Rol != Roles.Cliente)
+        if (modelo.Rol != Roles.Administrador && modelo.Rol != Roles.Recepcionista && modelo.Rol != Roles.Entrenador && modelo.Rol != Roles.Nutricionista && modelo.Rol != Roles.Administrativo && modelo.Rol != Roles.Cliente)
         {
             ModelState.AddModelError(nameof(modelo.Rol), "Elegi un rol.");
         }
@@ -116,7 +119,7 @@ public class UsuarioController : Controller
             }
         }
 
-        if (modelo.Rol == Roles.Empleado && !Cargos.Todos.Contains(modelo.Cargo ?? ""))
+        if (modelo.Rol == Roles.Recepcionista && !Cargos.Todos.Contains(modelo.Cargo ?? ""))
         {
             ModelState.AddModelError(nameof(modelo.Cargo), "Elegi un cargo de la lista.");
         }
@@ -144,11 +147,28 @@ public class UsuarioController : Controller
 
         if (modelo.Rol == Roles.Cliente)
         {
-            usuario.Cliente = new Cliente { FechaNacimiento = modelo.FechaNacimiento!.Value };
+            string? rutaAptoMedico = null;
+
+            if (modelo.ArchivoAptoMedico != null &&
+                modelo.ArchivoAptoMedico.Length > 0)
+            {
+                rutaAptoMedico = await _archivos.GuardarAsync(
+                    modelo.ArchivoAptoMedico,
+                    "aptos-medicos");
+            }
+
+            usuario.Cliente = new Cliente
+            {
+                FechaNacimiento = modelo.FechaNacimiento!.Value,
+                AptoMedico = rutaAptoMedico
+            };
         }
-        else if (modelo.Rol == Roles.Empleado)
+        else if (modelo.Rol == Roles.Recepcionista)
         {
-            usuario.Empleado = new Empleado { Cargo = modelo.Cargo! };
+            usuario.Empleado = new Empleado
+            {
+                Cargo = modelo.Cargo!
+            };
         }
 
         var resultado = await _userManager.CreateAsync(usuario, modelo.Password ?? "");
@@ -227,8 +247,12 @@ public class UsuarioController : Controller
             Avatar = usuario.Avatar
         };
 
+        modelo.EsCliente = await _userManager.IsInRoleAsync(
+            usuario, Roles.Cliente);
+
         return View(modelo);
     }
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -239,16 +263,6 @@ public class UsuarioController : Controller
             return BadRequest();
         }
 
-        
-        ModelState.Remove(nameof(modelo.Rol));
-
-        ValidarAvatar(modelo.ArchivoAvatar);
-
-        if (!ModelState.IsValid)
-        {
-            return View(modelo);
-        }
-
         var usuario = await _userManager.FindByIdAsync(id.ToString());
 
         if (usuario == null)
@@ -256,43 +270,146 @@ public class UsuarioController : Controller
             return NotFound();
         }
 
-        var avatarAnterior = usuario.Avatar;
+        modelo.EsCliente = await _userManager.IsInRoleAsync(
+            usuario, Roles.Cliente);
 
-        if (modelo.ArchivoAvatar != null && modelo.ArchivoAvatar.Length > 0)
+        ModelState.Remove(nameof(modelo.Rol));
+
+        ValidarAvatar(modelo.ArchivoAvatar);
+
+        // El archivo médico solo se admite para clientes.
+        if (!modelo.EsCliente && modelo.ArchivoAptoMedico != null)
         {
-            usuario.Avatar = await _archivos.GuardarAsync(modelo.ArchivoAvatar, "avatares");
+            ModelState.AddModelError(
+                nameof(modelo.ArchivoAptoMedico),
+                "Solo los clientes pueden tener un apto médico.");
         }
 
-        usuario.Nombre = modelo.Nombre;
-        usuario.Apellido = modelo.Apellido;
-        usuario.Email = modelo.Email;
-        usuario.UserName = modelo.Email;
-        usuario.PhoneNumber = modelo.Telefono;
-
-        var resultado = await _userManager.UpdateAsync(usuario);
-
-        if (resultado.Succeeded)
+        // Validar el archivo médico.
+        if (modelo.ArchivoAptoMedico != null &&
+            modelo.ArchivoAptoMedico.Length > 0)
         {
-            // Si se subio un avatar nuevo, el anterior ya no sirve
-            if (usuario.Avatar != avatarAnterior)
+            var extension = Path.GetExtension(
+                modelo.ArchivoAptoMedico.FileName).ToLowerInvariant();
+
+            var extensionesPermitidas = new[]
+            {
+            ".pdf", ".jpg", ".jpeg", ".png"
+        };
+
+            if (!extensionesPermitidas.Contains(extension))
+            {
+                ModelState.AddModelError(
+                    nameof(modelo.ArchivoAptoMedico),
+                    "El apto médico debe ser PDF, JPG o PNG.");
+            }
+
+            if (modelo.ArchivoAptoMedico.Length > 5 * 1024 * 1024)
+            {
+                ModelState.AddModelError(
+                    nameof(modelo.ArchivoAptoMedico),
+                    "El apto médico no puede superar los 5 MB.");
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(modelo);
+        }
+
+        var cliente = modelo.EsCliente
+            ? await _contexto.Clientes
+                .FirstOrDefaultAsync(c => c.UsuarioId == usuario.Id)
+            : null;
+
+        if (modelo.EsCliente && cliente == null)
+        {
+            ModelState.AddModelError(
+                "",
+                "No se encontró el registro de cliente asociado al usuario.");
+
+            return View(modelo);
+        }
+
+        var avatarAnterior = usuario.Avatar;
+        var aptoAnterior = cliente?.AptoMedico;
+
+        string? nuevoApto = null;
+        string? nuevoAvatar = null;
+
+        try
+        {
+            if (modelo.ArchivoAvatar != null &&
+                modelo.ArchivoAvatar.Length > 0)
+            {
+                nuevoAvatar = await _archivos.GuardarAsync(
+                    modelo.ArchivoAvatar, "avatares");
+
+                usuario.Avatar = nuevoAvatar;
+            }
+
+            if (cliente != null &&
+                modelo.ArchivoAptoMedico != null &&
+                modelo.ArchivoAptoMedico.Length > 0)
+            {
+                nuevoApto = await _archivos.GuardarAsync(
+                    modelo.ArchivoAptoMedico, "aptos-medicos");
+
+                cliente.AptoMedico = nuevoApto;
+            }
+
+            usuario.Nombre = modelo.Nombre;
+            usuario.Apellido = modelo.Apellido;
+            usuario.Email = modelo.Email;
+            usuario.UserName = modelo.Email;
+            usuario.PhoneNumber = modelo.Telefono;
+
+            var resultado = await _userManager.UpdateAsync(usuario);
+
+            if (!resultado.Succeeded)
+            {
+                foreach (var error in resultado.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                return View(modelo);
+            }
+
+            if (cliente != null && nuevoApto != null)
+            {
+                await _contexto.SaveChangesAsync();
+            }
+
+            // Borrar los archivos anteriores solo después de guardar.
+            if (nuevoAvatar != null)
             {
                 _archivos.Borrar(avatarAnterior);
             }
 
+            if (nuevoApto != null)
+            {
+                _archivos.Borrar(aptoAnterior);
+            }
+
             return RedirectToAction(nameof(Index));
         }
-
-        if (usuario.Avatar != avatarAnterior)
+        catch
         {
-            _archivos.Borrar(usuario.Avatar);
-        }
+            // Limpiar los archivos nuevos si ocurre un error.
+            if (nuevoAvatar != null)
+            {
+                _archivos.Borrar(nuevoAvatar);
+                usuario.Avatar = avatarAnterior;
+            }
 
-        foreach (var error in resultado.Errors)
-        {
-            ModelState.AddModelError("", error.Description);
-        }
+            if (nuevoApto != null)
+            {
+                _archivos.Borrar(nuevoApto);
+            }
 
-        return View(modelo);
+            throw;
+        }
     }
 
     [HttpGet]
