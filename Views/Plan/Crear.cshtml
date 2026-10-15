@@ -1,0 +1,51 @@
+@model Gimnasio.Models.Plan
+
+@{
+    ViewData["Title"] = "Nuevo plan";
+}
+
+<h1>Nuevo plan</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-action="Crear" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Nombre" class="form-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Precio" class="form-label"></label>
+                <input asp-for="Precio" type="number" step="1" min="0" class="form-control"
+                       value="@Model.Precio.ToString("0", System.Globalization.CultureInfo.InvariantCulture)" />
+                <span asp-validation-for="Precio" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DuracionDias" class="form-label"></label>
+                <input asp-for="DuracionDias" type="number" min="1" class="form-control" />
+                <span asp-validation-for="DuracionDias" class="text-danger"></span>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Crear plan</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

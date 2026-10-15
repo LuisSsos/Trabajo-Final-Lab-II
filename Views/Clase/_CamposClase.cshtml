@@ -1,0 +1,28 @@
+@model Gimnasio.Models.ViewModels.ClaseViewModel
+
+<div class="mb-3">
+    <label asp-for="Nombre" class="form-label"></label>
+    <input asp-for="Nombre" class="form-control" />
+    <span asp-validation-for="Nombre" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Descripcion" class="form-label"></label>
+    <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+    <span asp-validation-for="Descripcion" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="CupoMaximo" class="form-label"></label>
+    <input asp-for="CupoMaximo" type="number" min="1" max="500" class="form-control" />
+    <span asp-validation-for="CupoMaximo" class="text-danger"></span>
+</div>
+
+<div class="mb-3 position-relative">
+    <label asp-for="NombreEntrenador" class="form-label"></label>
+    <input asp-for="NombreEntrenador" class="form-control" autocomplete="off"
+           placeholder="Escribí el nombre o apellido del entrenador" />
+    <input type="hidden" asp-for="EmpleadoId" />
+    <div id="resultadosEntrenador" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10;"></div>
+    <span asp-validation-for="EmpleadoId" class="text-danger"></span>
+</div>

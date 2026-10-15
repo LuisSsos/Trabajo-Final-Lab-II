@@ -1,0 +1,38 @@
+@model Gimnasio.Models.ViewModels.ClaseViewModel
+
+@{
+    ViewData["Title"] = "Detalles de la clase";
+}
+
+<h1>Detalles de la clase</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Nombre</dt>
+            <dd class="col-sm-9">@Model.Nombre</dd>
+
+            <dt class="col-sm-3">Descripción</dt>
+            <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Descripcion) ? "-" : Model.Descripcion)</dd>
+
+            <dt class="col-sm-3">Cupo máximo</dt>
+            <dd class="col-sm-9">@Model.CupoMaximo</dd>
+
+            <dt class="col-sm-3">Entrenador</dt>
+            <dd class="col-sm-9">@Model.NombreEntrenador</dd>
+
+        </dl>
+
+        <div class="mt-4">
+
+            <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Volver</a>
+
+        </div>
+
+    </div>
+</div>

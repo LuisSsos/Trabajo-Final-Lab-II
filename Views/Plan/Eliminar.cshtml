@@ -1,0 +1,48 @@
+@model Gimnasio.Models.Plan
+
+@{
+    ViewData["Title"] = "Eliminar plan";
+}
+
+<h1>Eliminar plan</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="alert alert-warning">
+            ¿Estás seguro de que querés eliminar este plan?
+            Esta acción no se puede deshacer.
+        </div>
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Nombre</dt>
+            <dd class="col-sm-9">@Model.Nombre</dd>
+
+            <dt class="col-sm-3">Precio</dt>
+            <dd class="col-sm-9">$@Model.Precio.ToString("N2")</dd>
+
+            <dt class="col-sm-3">Duración (días)</dt>
+            <dd class="col-sm-9">@Model.DuracionDias</dd>
+
+        </dl>
+
+        <form asp-action="EliminarConfirmado" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Id" />
+
+            <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+
+        </form>
+
+    </div>
+
+</div>

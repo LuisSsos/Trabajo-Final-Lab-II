@@ -16,6 +16,11 @@ public class UsuarioController : Controller
     private static readonly string[] ExtensionesAvatar = { ".jpg", ".jpeg", ".png", ".webp" };
     private const long TamanoMaximoAvatar = 2 * 1024 * 1024;
 
+    private static readonly string[] RolesEmpleado =
+    {
+        Roles.Recepcionista, Roles.Entrenador, Roles.Nutricionista, Roles.Administrativo
+    };
+
     private readonly UserManager<Usuario> _userManager;
     private readonly ServicioArchivos _archivos;
     private readonly ContextoDatos _contexto;
@@ -119,11 +124,6 @@ public class UsuarioController : Controller
             }
         }
 
-        if (modelo.Rol == Roles.Recepcionista && !Cargos.Todos.Contains(modelo.Cargo ?? ""))
-        {
-            ModelState.AddModelError(nameof(modelo.Cargo), "Elegi un cargo de la lista.");
-        }
-
         ValidarAvatar(modelo.ArchivoAvatar);
 
         if (!ModelState.IsValid)
@@ -163,11 +163,11 @@ public class UsuarioController : Controller
                 AptoMedico = rutaAptoMedico
             };
         }
-        else if (modelo.Rol == Roles.Recepcionista)
+        else if (RolesEmpleado.Contains(modelo.Rol))
         {
             usuario.Empleado = new Empleado
             {
-                Cargo = modelo.Cargo!
+                Cargo = modelo.Rol
             };
         }
 

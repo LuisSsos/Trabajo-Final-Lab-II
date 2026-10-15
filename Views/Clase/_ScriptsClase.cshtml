@@ -1,0 +1,54 @@
+<script>
+    const buscador = document.getElementById("NombreEntrenador");
+    const campoId = document.getElementById("EmpleadoId");
+    const resultados = document.getElementById("resultadosEntrenador");
+    let temporizador;
+
+    async function buscar() {
+        const termino = buscador.value.trim();
+        const url = "@Url.Action("BuscarEntrenadores", "Clase")" + "?termino=" + encodeURIComponent(termino);
+
+        const respuesta = await fetch(url);
+        const entrenadores = await respuesta.json();
+
+        resultados.innerHTML = "";
+
+        if (entrenadores.length === 0) {
+            const vacio = document.createElement("div");
+            vacio.className = "list-group-item text-muted";
+            vacio.textContent = "No se encontraron entrenadores";
+            resultados.appendChild(vacio);
+            return;
+        }
+
+        for (const entrenador of entrenadores) {
+            const opcion = document.createElement("button");
+            opcion.type = "button";
+            opcion.className = "list-group-item list-group-item-action";
+            opcion.textContent = entrenador.nombre;
+
+            opcion.addEventListener("click", () => {
+                buscador.value = entrenador.nombre;
+                campoId.value = entrenador.id;
+                resultados.innerHTML = "";
+            });
+
+            resultados.appendChild(opcion);
+        }
+    }
+
+    buscador.addEventListener("focus", buscar);
+
+    buscador.addEventListener("input", () => {
+        // si se vuelve a escribir, hay que elegir de nuevo de la lista
+        campoId.value = "";
+        clearTimeout(temporizador);
+        temporizador = setTimeout(buscar, 300);
+    });
+
+    document.addEventListener("click", (evento) => {
+        if (evento.target !== buscador) {
+            resultados.innerHTML = "";
+        }
+    });
+</script>
