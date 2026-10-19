@@ -1,3 +1,4 @@
+
 @model List<Gimnasio.Models.ViewModels.UsuarioViewModel>
 
 @{
@@ -6,38 +7,79 @@
     int totalPaginas = ViewBag.TotalPaginas;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Usuarios</h1>
+<div class="d-flex flex-column flex-md-row justify-content-between
+            align-items-md-center gap-3 mb-4">
 
-    <a asp-action="Crear" class="btn btn-primary">
-        Nuevo usuario
-    </a>
+    <div>
+        <h1 class="mb-1">Gestión de usuarios</h1>
+        <p class="text-muted mb-0">
+            Consultá y administrá los usuarios del gimnasio.
+        </p>
+    </div>
+
+    <div>
+        <a asp-action="Crear" class="btn btn-primary px-3 py-2">
+            <span class="me-1">+</span>
+            Nuevo usuario
+        </a>
+    </div>
+
 </div>
 
 <div class="card shadow-sm">
 
-    <div class="card-body">
+    <div class="card-header py-3">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+
+            <h2 class="h5 mb-0">Listado de usuarios</h2>
+
+            <span class="badge text-bg-primary rounded-pill align-self-start">
+                Página @paginaActual de @totalPaginas
+            </span>
+
+        </div>
+    </div>
+
+    <div class="card-body p-0">
 
         @if (!Model.Any())
         {
-            <div class="alert alert-info">
-                No hay usuarios registrados.
+            <div class="text-center py-5 px-3">
+
+                <div class="mb-3">
+                    <span class="badge rounded-circle text-bg-light p-3">
+                        <span class="fs-4">👤</span>
+                    </span>
+                </div>
+
+                <h3 class="h5">No hay usuarios registrados</h3>
+
+                <p class="text-muted mb-3">
+                    Cuando haya usuarios registrados, aparecerán en este listado.
+                </p>
+
+                <a asp-action="Crear" class="btn btn-primary">
+                    Crear primer usuario
+                </a>
+
             </div>
         }
         else
         {
             <div class="table-responsive">
 
-                <table class="table table-striped table-hover align-middle">
+                <table class="table table-hover align-middle mb-0">
 
                     <thead>
                         <tr>
-                            <th>Id</th>
-                            <th>Avatar</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Acciones</th>
+                            <th scope="col" class="ps-3">ID</th>
+                            <th scope="col">Avatar</th>
+                            <th scope="col">Nombre completo</th>
+                            <th scope="col">Correo electrónico</th>
+                            <th scope="col">Teléfono</th>
+                            <th scope="col" class="text-center pe-3">
+                                Acciones
+                            </th>
                         </tr>
                     </thead>
 
@@ -47,8 +89,10 @@
                         {
                             <tr>
 
-                                <td>
-                                    @usuario.Id
+                                <td class="ps-3">
+                                    <span class="badge text-bg-light border">
+                                        #@usuario.Id
+                                    </span>
                                 </td>
 
                                 <td>
@@ -56,37 +100,49 @@
                                 </td>
 
                                 <td>
-                                    @usuario.Nombre @usuario.Apellido
+                                    <span class="fw-semibold">
+                                        @usuario.Nombre @usuario.Apellido
+                                    </span>
                                 </td>
 
                                 <td>
-                                    @usuario.Email
+                                    @if (!string.IsNullOrWhiteSpace(usuario.Email))
+                                    {
+                                        <span>@usuario.Email</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sin correo</span>
+                                    }
                                 </td>
 
                                 <td>
-                                    @(usuario.Telefono ?? "-")
+                                    @if (!string.IsNullOrWhiteSpace(usuario.Telefono))
+                                    {
+                                        <span>@usuario.Telefono</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sin teléfono</span>
+                                    }
                                 </td>
 
-                                <td>
+                                <td class="pe-3">
+                                    <div class="d-flex justify-content-center flex-wrap gap-1">
 
-                                    <a asp-action="Detalles"
-                                       asp-route-id="@usuario.Id"
-                                       class="btn btn-sm btn-info">
-                                        Ver
-                                    </a>
+                                        <a asp-action="Detalles" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary">
+                                            Ver
+                                        </a>
 
-                                    <a asp-action="Editar"
-                                       asp-route-id="@usuario.Id"
-                                       class="btn btn-sm btn-warning">
-                                        Editar
-                                    </a>
+                                        <a asp-action="Editar" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary">
+                                            Editar
+                                        </a>
 
-                                    <a asp-action="Eliminar"
-                                       asp-route-id="@usuario.Id"
-                                       class="btn btn-sm btn-danger">
-                                        Eliminar
-                                    </a>
+                                        <a asp-action="Eliminar" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-danger">
+                                            Eliminar
+                                        </a>
 
+                                    </div>
                                 </td>
 
                             </tr>
@@ -97,32 +153,65 @@
                 </table>
 
             </div>
-
-            @if (totalPaginas > 1)
-            {
-                <nav>
-                    <ul class="pagination justify-content-center mb-0 mt-3">
-
-                        <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-pagina="@(paginaActual - 1)">Anterior</a>
-                        </li>
-
-                        @for (var i = 1; i <= totalPaginas; i++)
-                        {
-                            <li class="page-item @(i == paginaActual ? "active" : "")">
-                                <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
-                            </li>
-                        }
-
-                        <li class="page-item @(paginaActual == totalPaginas ? "disabled" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-pagina="@(paginaActual + 1)">Siguiente</a>
-                        </li>
-
-                    </ul>
-                </nav>
-            }
         }
 
     </div>
+
+    <!-- Paginación -->
+    @if (totalPaginas > 1)
+    {
+        <div class="card-footer py-3">
+
+            <nav aria-label="Paginación de usuarios">
+
+                <ul class="pagination justify-content-center flex-wrap mb-0">
+
+                    <li class="page-item @(paginaActual <= 1 ? "disabled" : "")">
+
+                        @if (paginaActual <= 1)
+                        {
+                            <span class="page-link">Anterior</span>
+                        }
+                        else
+                        {
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(paginaActual - 1)">
+                                Anterior
+                            </a>
+                        }
+
+                    </li>
+
+                    @for (var i = 1; i <= totalPaginas; i++)
+                    {
+                        <li class="page-item @(i == paginaActual ? "active" : "")">
+
+                            <a class="page-link"asp-action="Index"asp-route-pagina="@i"aria-current="@(i == paginaActual ? "page" : null)">
+                                @i
+                            </a>
+
+                        </li>
+                    }
+
+                    <li class="page-item @(paginaActual >= totalPaginas ? "disabled" : "")">
+
+                        @if (paginaActual >= totalPaginas)
+                        {
+                            <span class="page-link">Siguiente</span>
+                        }
+                        else
+                        {
+                            <a class="page-link"asp-action="Index"asp-route-pagina="@(paginaActual + 1)">
+                                Siguiente
+                            </a>
+                        }
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+        </div>
+    }
 
 </div>

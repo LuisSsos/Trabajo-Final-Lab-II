@@ -1,81 +1,136 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Gimnasio</title>
+
     <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Gimnasio.styles.css" asp-append-version="true" />
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Gimnasio</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container-fluid px-3 px-lg-4">
+
+                <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" asp-controller="Home"
+                   asp-action="Index">
+
+                    <span class="badge rounded-2 text-bg-primary fs-6">
+                        G
+                    </span>
+
+                    <span>Gimnasio</span>
+                </a>
+
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                        aria-controls="navbarContent" aria-expanded="false" aria-label="Abrir o cerrar el menú">
+
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Inicio</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                Inicio
+                            </a>
                         </li>
+
                         @if (User.IsInRole(Gimnasio.Models.Roles.Administrador))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Usuario" asp-action="Index">Usuarios</a>
+                                <a class="nav-link" asp-controller="Usuario" asp-action="Index">
+                                    Usuarios
+                                </a>
                             </li>
+
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Plan" asp-action="Index">Planes</a>
+                                <a class="nav-link" asp-controller="Plan" asp-action="Index">
+                                    Planes
+                                </a>
                             </li>
+
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Clase" asp-action="Index">Clases</a>
+                                <a class="nav-link" asp-controller="Clase" asp-action="Index">
+                                    Clases
+                                </a>
                             </li>
                         }
+
                     </ul>
-                    <ul class="navbar-nav">
+
+
+                    <ul class="navbar-nav align-items-lg-center gap-lg-2">
+
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
-                                <span class="nav-link text-dark">@User.Identity.Name</span>
+                                <span class="nav-link text-white-50">
+                                    <span class="me-1">●</span>
+                                    @User.Identity.Name
+                                </span>
                             </li>
+
                             <li class="nav-item">
                                 <form asp-controller="Cuenta" asp-action="Logout" method="post">
-                                    <button type="submit" class="nav-link btn btn-link text-dark">Cerrar sesión</button>
+
+                                    <button type="submit" class="btn btn-outline-light btn-sm">
+                                        Cerrar sesión
+                                    </button>
+
                                 </form>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Cuenta" asp-action="Login">Iniciar sesión</a>
+                                <a class="btn btn-primary btn-sm" asp-controller="Cuenta" asp-action="Login">
+                                    Iniciar sesión
+                                </a>
                             </li>
                         }
+
                     </ul>
+
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Gimnasio - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Contenido de la página -->
+    <main role="main" class="container py-4 flex-grow-1">
+        @RenderBody()
+    </main>
+
+  
+    <footer class="border-top mt-auto py-3">
+        <div class="container text-center text-muted small">
+            &copy; 2026 - Gimnasio
+            <span class="mx-2">|</span>
+            <a class="link-secondary text-decoration-none" asp-controller="Home" asp-action="Privacy">
+                Privacidad
+            </a>
         </div>
     </footer>
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 
 </html>
