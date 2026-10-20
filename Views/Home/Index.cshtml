@@ -1,8 +1,204 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<Gimnasio.Models.ViewModels.ClaseDestacadaViewModel>
+
+@{
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-4">
+
+    <section class="mb-4">
+        <h1 class="display-5 fw-bold">¡Bienvenido a Gimnasio!</h1>
+        <p class="text-muted fs-5 mb-0">
+            Descubrí nuestras clases y consultá las principales secciones del sistema.
+        </p>
+    </section>
+
+    <section class="mb-5">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h2 class="h3 mb-1">Clases destacadas</h2>
+                <p class="text-muted mb-0">
+                    Las cinco clases con más reservas.
+                </p>
+            </div>
+        </div>
+
+        @if (Model == null || Model.Count == 0)
+        {
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <h3 class="h5">Todavía no hay clases registradas</h3>
+                    <p class="text-muted mb-0">
+                        Cuando se agreguen clases al sistema, aparecerán acá.
+                    </p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div id="carruselClases"
+                 class="carousel slide"
+                 data-bs-ride="carousel"
+                 data-bs-interval="5000">
+
+                <div class="carousel-indicators">
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <button type="button"
+                                data-bs-target="#carruselClases"
+                                data-bs-slide-to="@i"
+                                class="@(i == 0 ? "active" : "")"
+                                aria-current="@(i == 0 ? "true" : "false")"
+                                aria-label="Clase @(i + 1)">
+                        </button>
+                    }
+                </div>
+
+                <div class="carousel-inner">
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var clase = Model[i];
+                        var porcentajeOcupacion = clase.CupoMaximo >= 0
+                            ? Math.Min(100, (int)Math.Round(
+                                clase.CantidadReservas * 100.0 / clase.CupoMaximo))
+                            : 0;
+
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body p-4 p-md-5">
+                                    <div class="row align-items-center g-4">
+                                        <div class="col-md-8">
+                                            <span class="badge text-bg-primary mb-3">
+                                                Clase destacada @(i + 1)
+                                            </span>
+
+                                            <h3 class="display-6 fw-bold">
+                                                @clase.Nombre
+                                            </h3>
+
+                                            <p class="text-muted mb-4">
+                                                @(string.IsNullOrWhiteSpace(clase.Descripcion)
+                                                    ? "Conocé esta actividad de nuestro gimnasio."
+                                                    : clase.Descripcion)
+                                            </p>
+
+                                            <div class="d-flex flex-wrap gap-3">
+                                                <div>
+                                                    <div class="text-muted small">
+                                                        Reservas vigentes
+                                                    </div>
+                                                    <div class="fs-4 fw-bold">
+                                                        @clase.CantidadReservas
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <div class="text-muted small">
+                                                        Cupo máximo
+                                                    </div>
+                                                    <div class="fs-4 fw-bold">
+                                                        @clase.CupoMaximo
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="rounded-3 bg-body-tertiary p-4">
+                                                <div class="d-flex justify-content-between gap-2 mb-2">
+                                                    <span class="fw-semibold">
+                                                        Ocupación
+                                                    </span>
+                                                    <span>@porcentajeOcupacion%</span>
+                                                </div>
+
+                                                <div class="progress"
+                                                     role="progressbar"
+                                                     aria-label="Porcentaje de ocupación"
+                                                     aria-valuenow="@porcentajeOcupacion"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="100">
+                                                    <div class="progress-bar"
+                                                         style="width: @porcentajeOcupacion%">
+                                                    </div>
+                                                </div>
+
+                                                <p class="small text-muted mt-3 mb-0">
+                                                    Porcentaje calculado sobre el cupo máximo.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (Model.Count > 1)
+                {
+                    <button class="carousel-control-prev"
+                            type="button"
+                            data-bs-target="#carruselClases"
+                            data-bs-slide="prev"
+                            aria-label="Clase anterior">
+                        <span class="carousel-control-prev-icon bg-dark rounded-circle p-3"
+                              aria-hidden="true"></span>
+                    </button>
+
+                    <button class="carousel-control-next"
+                            type="button"
+                            data-bs-target="#carruselClases"
+                            data-bs-slide="next"
+                            aria-label="Clase siguiente">
+                        <span class="carousel-control-next-icon bg-dark rounded-circle p-3"
+                              aria-hidden="true"></span>
+                    </button>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="mb-4">
+        <h2 class="h3 mb-3">Accesos rápidos</h2>
+
+        <div class="row g-3">
+            <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Usuario" asp-action="Index"
+                   class="card h-100 shadow-sm text-decoration-none">
+                    <div class="card-body">
+                        <h3 class="h5">Usuarios</h3>
+                        <p class="text-muted mb-0">
+                            Gestionar las cuentas del sistema.
+                        </p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Plan" asp-action="Index"
+                   class="card h-100 shadow-sm text-decoration-none">
+                    <div class="card-body">
+                        <h3 class="h5">Planes</h3>
+                        <p class="text-muted mb-0">
+                            Consultar los planes del gimnasio.
+                        </p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Clase" asp-action="Index"
+                   class="card h-100 shadow-sm text-decoration-none">
+                    <div class="card-body">
+                        <h3 class="h5">Clases</h3>
+                        <p class="text-muted mb-0">
+                            Consultar las actividades disponibles.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
 </div>
