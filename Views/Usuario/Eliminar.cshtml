@@ -1,71 +1,76 @@
+```cshtml
 @model Gimnasio.Models.ViewModels.UsuarioViewModel
 
 @{
     ViewData["Title"] = "Eliminar usuario";
 }
 
-<h1>Eliminar usuario</h1>
-
-<hr />
-
-<div class="card shadow-sm">
-
-    <div class="card-body">
-
-        <div class="alert alert-warning">
-            ¿Estás seguro de que querés eliminar este usuario?
-            Esta acción no se puede deshacer.
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h2 mb-1">Eliminar usuario</h1>
+            <p class="text-muted mb-0">
+                Confirmá la eliminación de la cuenta seleccionada.
+            </p>
         </div>
 
-        <dl class="row">
-
-            <dt class="col-sm-3">
-                Nombre
-            </dt>
-
-            <dd class="col-sm-9">
-                @Model.Nombre @Model.Apellido
-            </dd>
-
-            <dt class="col-sm-3">
-                Email
-            </dt>
-
-            <dd class="col-sm-9">
-                @Model.Email
-            </dd>
-
-            <dt class="col-sm-3">
-                Teléfono
-            </dt>
-
-            <dd class="col-sm-9">
-                @(string.IsNullOrWhiteSpace(Model.Telefono)
-                    ? "-"
-                    : Model.Telefono)
-            </dd>
-
-        </dl>
-
-        <form asp-action="EliminarConfirmado" method="post">
-
-            @Html.AntiForgeryToken()
-
-            <input type="hidden"
-                   asp-for="Id" />
-
-            <button type="submit"
-                    class="btn btn-danger">
-                Sí, eliminar
-            </button>
-
-            <a asp-action="Index"
-               class="btn btn-secondary">
-                Cancelar
-            </a>
-
-        </form>
-
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Volver al listado
+        </a>
     </div>
 
+    <div class="card shadow-sm">
+        <div class="card-header py-3">
+            <h2 class="h5 mb-0">Confirmación de eliminación</h2>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="alert alert-warning" role="alert">
+                <h3 class="h6 alert-heading">¿Estás seguro?</h3>
+                <p class="mb-0">
+                    Vas a eliminar este usuario. Esta acción no se puede deshacer.
+                    Verificá sus datos antes de continuar.
+                </p>
+            </div>
+
+            <dl class="row mb-4">
+                <dt class="col-sm-3 py-2">ID</dt>
+                <dd class="col-sm-9 py-2">
+                    #@Model.Id
+                </dd>
+
+                <dt class="col-sm-3 py-2">Nombre completo</dt>
+                <dd class="col-sm-9 py-2">
+                    @Model.Nombre @Model.Apellido
+                </dd>
+
+                <dt class="col-sm-3 py-2">Correo electrónico</dt>
+                <dd class="col-sm-9 py-2">
+                    @(string.IsNullOrWhiteSpace(Model.Email) ? "-" : Model.Email)
+                </dd>
+
+                <dt class="col-sm-3 py-2">Teléfono</dt>
+                <dd class="col-sm-9 py-2">
+                    @(string.IsNullOrWhiteSpace(Model.Telefono) ? "-" : Model.Telefono)
+                </dd>
+            </dl>
+
+            <form asp-action="EliminarConfirmado" method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="Id" />
+
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-danger">
+                        Sí, eliminar usuario
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+```

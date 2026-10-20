@@ -1,92 +1,130 @@
+```cshtml
 @model Gimnasio.Models.ViewModels.UsuarioViewModel
 
 @{
     ViewData["Title"] = "Editar usuario";
 }
 
-<h1>Editar usuario</h1>
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h2 mb-1">Editar usuario</h1>
+            <p class="text-muted mb-0">
+                Modificá los datos del usuario seleccionado.
+            </p>
+        </div>
 
-<hr />
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Volver al listado
+        </a>
+    </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <p>¿Es cliente?: @Model.EsCliente</p>
-        <form asp-action="Editar" method="post" enctype="multipart/form-data">
+    <div class="card shadow-sm">
+        <div class="card-header py-3">
+            <h2 class="h5 mb-0">Información del usuario</h2>
+        </div>
 
-            @Html.AntiForgeryToken()
+        <div class="card-body p-4">
+            <form asp-action="Editar" method="post" enctype="multipart/form-data">
 
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="Avatar" />
+                @Html.AntiForgeryToken()
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3">
-            </div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Avatar" />
 
-            <div class="mb-3">
-                <label asp-for="Nombre" class="form-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Apellido" class="form-label"></label>
-                <input asp-for="Apellido" class="form-control" />
-                <span asp-validation-for="Apellido" class="text-danger"></span>
-            </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
 
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" type="email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
+                    <div class="col-md-6">
+                        <label asp-for="Apellido" class="form-label"></label>
+                        <input asp-for="Apellido" class="form-control" />
+                        <span asp-validation-for="Apellido" class="text-danger"></span>
+                    </div>
 
-            <div class="mb-3">
-                <label asp-for="Telefono" class="form-label"></label>
-                <input asp-for="Telefono" class="form-control" />
-                <span asp-validation-for="Telefono" class="text-danger"></span>
-            </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" type="email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
 
-            <div class="mb-3">
-                <label asp-for="ArchivoAvatar" class="form-label">Avatar</label>
+                    <div class="col-md-6">
+                        <label asp-for="Telefono" class="form-label"></label>
+                        <input asp-for="Telefono" class="form-control" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
 
-                <div class="mb-2">
-                    @{
-                        ViewData["Tamano"] = 80;
+                    <div class="col-12">
+                        <hr class="my-2" />
+                        <h3 class="h5 mb-3">Imagen de perfil</h3>
+
+                        <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                            @{
+                                ViewData["Tamano"] = 80;
+                            }
+
+                            <partial name="_Avatar" model="Model" />
+
+                            <div>
+                                <div class="fw-semibold">Avatar actual</div>
+                                <div class="text-muted small">
+                                    Podés conservarlo o seleccionar una imagen nueva.
+                                </div>
+                            </div>
+                        </div>
+
+                        <label asp-for="ArchivoAvatar" class="form-label">
+                            Cambiar avatar
+                        </label>
+                        <input asp-for="ArchivoAvatar" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+
+                        <div class="form-text">
+                            Formatos permitidos: JPG, JPEG, PNG y WEBP.
+                            Si no elegís una imagen nueva, se mantiene la actual.
+                        </div>
+
+                        <span asp-validation-for="ArchivoAvatar" class="text-danger"></span>
+                    </div>
+
+                    @if (Model.EsCliente)
+                    {
+                        <div class="col-12">
+                            <hr class="my-2" />
+                            <h3 class="h5 mb-3">Documentación médica</h3>
+
+                            <label class="form-label" for="ArchivoAptoMedico">
+                                Nuevo apto médico (opcional)
+                            </label>
+
+                            <input type="file" id="ArchivoAptoMedico" name="ArchivoAptoMedico" class="form-control" accept=".pdf,.jpg,.jpeg,.png" />
+
+                            <div class="form-text">
+                                Formatos permitidos: PDF, JPG y PNG.
+                                Si no seleccionás otro archivo, se conserva el actual.
+                            </div>
+                        </div>
                     }
-                    <partial name="_Avatar" model="Model" />
                 </div>
 
-                <input asp-for="ArchivoAvatar" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
-                <div class="form-text">Si no elegís una imagen nueva, se mantiene la actual.</div>
-                <span asp-validation-for="ArchivoAvatar" class="text-danger"></span>
-            </div>
+                <hr class="my-4" />
 
-            @if (Model.EsCliente)
-            {
-                <div class="mb-3" id="campoAptoMedico">
-                    <label class="form-label" for="ArchivoAptoMedico">
-                        Apto médico (opcional)
-                    </label>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Guardar cambios
+                    </button>
 
-                    <input type="file" id="ArchivoAptoMedico" name="ArchivoAptoMedico" class="form-control"
-                           accept=".pdf,.jpg,.jpeg,.png" />
-
-                    <small class="form-text text-muted">
-                        Formatos permitidos: PDF, JPG y PNG.
-                        Si no elegís un archivo nuevo, se conserva el actual.
-                    </small>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
                 </div>
-            }
-
-            <button type="submit" class="btn btn-primary">
-                Guardar cambios
-            </button>
-
-            <a asp-action="Index" class="btn btn-secondary">
-                Cancelar
-            </a>
-
-        </form>
-
+            </form>
+        </div>
     </div>
 </div>
 
@@ -95,3 +133,4 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+```
