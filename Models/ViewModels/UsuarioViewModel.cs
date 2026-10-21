@@ -34,7 +34,6 @@ public class UsuarioViewModel
     public DateTime? FechaNacimiento { get; set; }
 
     [StringLength(80)]
-    public string? Cargo { get; set; }
 
     public IFormFile? ArchivoAptoMedico { get; set; }
     public bool EsCliente { get; set; }

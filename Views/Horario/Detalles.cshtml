@@ -1,0 +1,39 @@
+@using Gimnasio.Models.ViewModels
+@model HorarioViewModel
+
+@{
+    ViewData["Title"] = "Detalles del horario";
+}
+
+<h1>Detalles del horario</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Clase</dt>
+            <dd class="col-sm-9">@Model.NombreClase</dd>
+
+            <dt class="col-sm-3">Día</dt>
+            <dd class="col-sm-9">@HorarioViewModel.NombreDia(Model.DiaSemana)</dd>
+
+            <dt class="col-sm-3">Hora de inicio</dt>
+            <dd class="col-sm-9">@Model.HoraInicio?.ToString("hh\\:mm")</dd>
+
+            <dt class="col-sm-3">Hora de fin</dt>
+            <dd class="col-sm-9">@Model.HoraFin?.ToString("hh\\:mm")</dd>
+
+        </dl>
+
+        <div class="mt-4">
+
+            <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Volver</a>
+
+        </div>
+
+    </div>
+</div>

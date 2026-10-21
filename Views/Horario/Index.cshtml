@@ -1,0 +1,109 @@
+@model List<Gimnasio.Models.ViewModels.HorarioViewModel>
+
+@{
+    ViewData["Title"] = "Horarios";
+    int paginaActual = ViewBag.PaginaActual;
+    int totalPaginas = ViewBag.TotalPaginas;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Horarios</h1>
+
+    <a asp-action="Crear" class="btn btn-primary">
+        Nuevo horario
+    </a>
+</div>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">
+                No hay horarios registrados.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+
+                <table class="table table-striped table-hover align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Clase</th>
+                            <th>Día</th>
+                            <th>Horario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var horario in Model)
+                        {
+                            <tr>
+                                <td>@horario.Id</td>
+                                <td>@horario.NombreClase</td>
+                                <td>@Gimnasio.Models.ViewModels.HorarioViewModel.NombreDia(horario.DiaSemana)</td>
+                                <td>@horario.HoraInicio?.ToString("hh\\:mm") a @horario.HoraFin?.ToString("hh\\:mm")</td>
+                                <td>
+
+                                    <a asp-action="Detalles"
+                                       asp-route-id="@horario.Id"
+                                       class="btn btn-sm btn-info">
+                                        Ver
+                                    </a>
+
+                                    <a asp-action="Editar"
+                                       asp-route-id="@horario.Id"
+                                       class="btn btn-sm btn-warning">
+                                        Editar
+                                    </a>
+
+                                    <a asp-action="Eliminar"
+                                       asp-route-id="@horario.Id"
+                                       class="btn btn-sm btn-danger">
+                                        Eliminar
+                                    </a>
+
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            @if (totalPaginas > 1)
+            {
+                <nav>
+                    <ul class="pagination justify-content-center mb-0 mt-3">
+
+                        <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(paginaActual - 1)">Anterior</a>
+                        </li>
+
+                        @for (var i = 1; i <= totalPaginas; i++)
+                        {
+                            <li class="page-item @(i == paginaActual ? "active" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
+                            </li>
+                        }
+
+                        <li class="page-item @(paginaActual == totalPaginas ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(paginaActual + 1)">Siguiente</a>
+                        </li>
+
+                    </ul>
+                </nav>
+            }
+        }
+
+    </div>
+
+</div>

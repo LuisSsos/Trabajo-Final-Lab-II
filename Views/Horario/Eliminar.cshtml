@@ -1,0 +1,49 @@
+@using Gimnasio.Models.ViewModels
+@model HorarioViewModel
+
+@{
+    ViewData["Title"] = "Eliminar horario";
+}
+
+<h1>Eliminar horario</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="alert alert-warning">
+            ¿Estás seguro de que querés eliminar este horario?
+            Esta acción no se puede deshacer.
+        </div>
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Clase</dt>
+            <dd class="col-sm-9">@Model.NombreClase</dd>
+
+            <dt class="col-sm-3">Día</dt>
+            <dd class="col-sm-9">@HorarioViewModel.NombreDia(Model.DiaSemana)</dd>
+
+            <dt class="col-sm-3">Horario</dt>
+            <dd class="col-sm-9">@Model.HoraInicio?.ToString("hh\\:mm") a @Model.HoraFin?.ToString("hh\\:mm")</dd>
+
+        </dl>
+
+        <form asp-action="EliminarConfirmado" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Id" />
+
+            <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+
+        </form>
+
+    </div>
+
+</div>

@@ -1,0 +1,41 @@
+@model Gimnasio.Models.ViewModels.MembresiaViewModel
+
+@{
+    ViewData["Title"] = "Detalles de la membresía";
+}
+
+<h1>Detalles de la membresía</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Cliente</dt>
+            <dd class="col-sm-9">@Model.NombreCliente</dd>
+
+            <dt class="col-sm-3">Plan</dt>
+            <dd class="col-sm-9">@Model.NombrePlan</dd>
+
+            <dt class="col-sm-3">Fecha de inicio</dt>
+            <dd class="col-sm-9">@Model.FechaInicio?.ToString("dd/MM/yyyy")</dd>
+
+            <dt class="col-sm-3">Fecha de fin</dt>
+            <dd class="col-sm-9">@Model.FechaFin?.ToString("dd/MM/yyyy")</dd>
+
+            <dt class="col-sm-3">Estado</dt>
+            <dd class="col-sm-9"><partial name="_EstadoMembresia" model="Model.Estado" /></dd>
+
+        </dl>
+
+        <div class="mt-4">
+
+            <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Volver</a>
+
+        </div>
+
+    </div>
+</div>

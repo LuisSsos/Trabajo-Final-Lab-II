@@ -66,6 +66,21 @@
                                     Clases
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Horario" asp-action="Index">
+                                    Horarios
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador) || User.IsInRole(Gimnasio.Models.Roles.Recepcionista))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Membresia" asp-action="Index">
+                                    Membresías
+                                </a>
+                            </li>
                         }
 
                     </ul>

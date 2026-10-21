@@ -1,0 +1,5 @@
+@model Gimnasio.Models.EstadoMembresia
+
+<span class="badge @(Model == Gimnasio.Models.EstadoMembresia.Activa ? "text-bg-success" : Model == Gimnasio.Models.EstadoMembresia.Vencida ? "text-bg-danger" : "text-bg-secondary")">
+    @Model
+</span>

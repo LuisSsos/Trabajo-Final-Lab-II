@@ -1,0 +1,29 @@
+@model Gimnasio.Models.ViewModels.HorarioViewModel
+
+<div class="mb-3">
+    <label asp-for="ClaseId" class="form-label"></label>
+    <select asp-for="ClaseId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Clases" class="form-select">
+        <option value="">Elegí una clase</option>
+    </select>
+    <span asp-validation-for="ClaseId" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="DiaSemana" class="form-label"></label>
+    <select asp-for="DiaSemana" asp-items="(IEnumerable<SelectListItem>)ViewBag.Dias" class="form-select"></select>
+    <span asp-validation-for="DiaSemana" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="HoraInicio" class="form-label"></label>
+    <input asp-for="HoraInicio" type="time" class="form-control"
+           value="@(Model.HoraInicio.HasValue ? Model.HoraInicio.Value.ToString("hh\\:mm") : "")" />
+    <span asp-validation-for="HoraInicio" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="HoraFin" class="form-label"></label>
+    <input asp-for="HoraFin" type="time" class="form-control"
+           value="@(Model.HoraFin.HasValue ? Model.HoraFin.Value.ToString("hh\\:mm") : "")" />
+    <span asp-validation-for="HoraFin" class="text-danger"></span>
+</div>

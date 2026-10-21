@@ -1,0 +1,35 @@
+@model Gimnasio.Models.ViewModels.MembresiaViewModel
+
+<div class="mb-3 position-relative">
+    <label asp-for="NombreCliente" class="form-label"></label>
+    <input asp-for="NombreCliente" class="form-control" autocomplete="off"
+           placeholder="Escribí el nombre o apellido del cliente" />
+    <input type="hidden" asp-for="ClienteId" />
+    <div id="resultadosCliente" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10;"></div>
+    <span asp-validation-for="ClienteId" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="PlanId" class="form-label"></label>
+    <select asp-for="PlanId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Planes" class="form-select">
+        <option value="">Elegí un plan</option>
+    </select>
+    <span asp-validation-for="PlanId" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="FechaInicio" class="form-label"></label>
+    <input asp-for="FechaInicio" type="date" class="form-control"
+           value="@(Model.FechaInicio.HasValue ? Model.FechaInicio.Value.ToString("yyyy-MM-dd") : "")" />
+    <span asp-validation-for="FechaInicio" class="text-danger"></span>
+    <div class="form-text">La fecha de fin se calcula sola según la duración del plan.</div>
+</div>
+
+@if (Model.Id != 0)
+{
+    <div class="mb-3">
+        <label asp-for="Estado" class="form-label"></label>
+        <select asp-for="Estado" asp-items="Html.GetEnumSelectList<Gimnasio.Models.EstadoMembresia>()" class="form-select"></select>
+        <span asp-validation-for="Estado" class="text-danger"></span>
+    </div>
+}

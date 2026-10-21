@@ -1,0 +1,54 @@
+<script>
+    const buscador = document.getElementById("NombreCliente");
+    const campoId = document.getElementById("ClienteId");
+    const resultados = document.getElementById("resultadosCliente");
+    let temporizador;
+
+    async function buscar() {
+        const termino = buscador.value.trim();
+        const url = "@Url.Action("BuscarClientes", "Membresia")" + "?termino=" + encodeURIComponent(termino);
+
+        const respuesta = await fetch(url);
+        const clientes = await respuesta.json();
+
+        resultados.innerHTML = "";
+
+        if (clientes.length === 0) {
+            const vacio = document.createElement("div");
+            vacio.className = "list-group-item text-muted";
+            vacio.textContent = "No se encontraron clientes";
+            resultados.appendChild(vacio);
+            return;
+        }
+
+        for (const cliente of clientes) {
+            const opcion = document.createElement("button");
+            opcion.type = "button";
+            opcion.className = "list-group-item list-group-item-action";
+            opcion.textContent = cliente.nombre;
+
+            opcion.addEventListener("click", () => {
+                buscador.value = cliente.nombre;
+                campoId.value = cliente.id;
+                resultados.innerHTML = "";
+            });
+
+            resultados.appendChild(opcion);
+        }
+    }
+
+    buscador.addEventListener("focus", buscar);
+
+    buscador.addEventListener("input", () => {
+        // si se vuelve a escribir, hay que elegir de nuevo de la lista
+        campoId.value = "";
+        clearTimeout(temporizador);
+        temporizador = setTimeout(buscar, 300);
+    });
+
+    document.addEventListener("click", (evento) => {
+        if (evento.target !== buscador) {
+            resultados.innerHTML = "";
+        }
+    });
+</script>

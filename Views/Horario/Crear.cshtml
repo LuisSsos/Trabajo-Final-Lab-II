@@ -1,0 +1,34 @@
+@model Gimnasio.Models.ViewModels.HorarioViewModel
+
+@{
+    ViewData["Title"] = "Nuevo horario";
+}
+
+<h1>Nuevo horario</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-action="Crear" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <partial name="_CamposHorario" model="Model" />
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Crear horario</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,35 @@
+@model Gimnasio.Models.ViewModels.MembresiaViewModel
+
+@{
+    ViewData["Title"] = "Nueva membresía";
+}
+
+<h1>Nueva membresía</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-action="Crear" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <partial name="_CamposMembresia" model="Model" />
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Crear membresía</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <partial name="_ScriptsMembresia" />
+}

@@ -15,7 +15,7 @@ Entidades propias:
 - **Cliente**: datos propios del cliente (fecha de nacimiento, apto médico). Se relaciona 1 a 1 con un usuario.
 - **Empleado**: datos propios del empleado (cargo). Se relaciona 1 a 1 con un usuario.
 - **Plan**: planes de suscripción (nombre, precio, duración en días).
-- **Membresía**: un cliente tiene un plan durante un período, con su estado.
+- **Membresía**: un cliente tiene un plan durante un período, con su estado. La fecha de fin se calcula sola sumando la duración del plan a la fecha de inicio.
 - **Pago**: cada membresía genera pagos (monto, fecha, método, comprobante).
 - **Clase**: clase que dicta un empleado, con cupo máximo.
 - **Horario**: días y horas en que se dicta cada clase.
@@ -31,13 +31,13 @@ Al eliminar un usuario empleado se elimina también su registro de Empleado y, e
 
 ## Estructura del proyecto
 
-- **Controllers/**: CuentaController (login y logout), UsuarioController (ABMC de usuarios con paginado, avatar y apto médico), PlanController (ABMC de planes), ClaseController (ABMC de clases con búsqueda AJAX de entrenador) y HomeController.
+- **Controllers/**: CuentaController (login y logout), UsuarioController (ABMC de usuarios con paginado, avatar y apto médico), PlanController (ABMC de planes), ClaseController (ABMC de clases con búsqueda AJAX de entrenador), HorarioController (ABMC de horarios), MembresiaController (ABMC de membresías con búsqueda AJAX de cliente) y HomeController.
 - **Services/ServicioArchivos.cs**: guarda y borra los archivos subidos (avatares y aptos médicos).
 - **wwwroot/uploads/**: carpeta donde se guardan los archivos subidos. Se crea sola y no se sube al repositorio.
 - **Data/ContextoDatos.cs**: conecta las clases con la base de datos y define reglas de las tablas.
 - **Data/SemillaDatos.cs**: al arrancar la app crea los roles y el usuario administrador si no existen.
 - **Models/**: las clases de las entidades, los enums (EstadoMembresia, EstadoTurno, MetodoPago) y los roles (Roles.cs).
-- **Models/ViewModels/**: modelos usados en las vistas (UsuarioViewModel y ClaseViewModel).
+- **Models/ViewModels/**: modelos usados en las vistas (UsuarioViewModel, ClaseViewModel, HorarioViewModel y MembresiaViewModel).
 - **Views/**: vistas simples.
 - **BaseDatos/gimnasio.sql**: exportación de la base de datos.
 - **Program.cs**: configuración de la app (base de datos, Identity, cookies de login, archivos estáticos).
@@ -135,7 +135,9 @@ Al arrancar, el seeder crea los roles Administrador, Recepcionista, Entrenador, 
 ## Seguridad
 
 - El login usa Identity con cookies. Si alguien intenta acceder sin iniciar sesión, se lo redirige a `/Cuenta/Login`.
-- `UsuarioController`, `PlanController` y `ClaseController` solo pueden ser utilizados por el rol Administrador. Quien esté logueado sin ese rol verá la pantalla de acceso denegado.
+- `UsuarioController`, `PlanController`, `ClaseController` y `HorarioController` solo pueden ser utilizados por el rol Administrador.
+- `MembresiaController` puede ser utilizado por los roles Administrador y Recepcionista.
+- Quien esté logueado sin el rol necesario verá la pantalla de acceso denegado.
 - Las contraseñas se guardan hasheadas con Identity.
 
 ## Requisitos mínimos
@@ -144,12 +146,12 @@ Al arrancar, el seeder crea los roles Administrador, Recepcionista, Entrenador, 
 
 - Al menos 4 tablas relacionadas, con una relación 1 a muchos. Está en `Models/` y `Data/ContextoDatos.cs`.
 - Login con `Authorize` y roles. Está en `Controllers/CuentaController.cs`, `Program.cs` y `Data/SemillaDatos.cs`.
-- Funcionalidad restringida por rol. Está en `Controllers/UsuarioController.cs`, `Controllers/PlanController.cs` y `Controllers/ClaseController.cs`.
+- Funcionalidad restringida por rol. Está en los controladores de usuarios, planes, clases, horarios y membresías.
 - Avatar en los usuarios. Se sube al crear o editar un usuario y se muestra en el listado y en el detalle. Está en `Controllers/UsuarioController.cs` y `Services/ServicioArchivos.cs`.
 - Uso de archivos además del avatar: apto médico del cliente, que se sube al crear o editar un cliente. Está en `Controllers/UsuarioController.cs`.
-- Listados con paginado del lado del servidor (10 por página, con `Skip` y `Take`). Está en `UsuarioController`, `PlanController` y `ClaseController`.
-- Selección de entidades relacionadas con búsqueda AJAX: al crear o editar una clase se busca el entrenador escribiendo su nombre. Está en `Controllers/ClaseController.cs` (`BuscarEntrenadores`) y `Views/Clase/`.
-- ABMC de planes y de clases.
+- Listados con paginado del lado del servidor (10 por página, con `Skip` y `Take`). Está en todos los listados de los controladores ya mencionados.
+- Selección de entidades relacionadas con búsqueda AJAX: al crear o editar una clase se busca el entrenador escribiendo su nombre, y al crear o editar una membresía se busca el cliente. Está en `ClaseController` (`BuscarEntrenadores`), `MembresiaController` (`BuscarClientes`) y sus vistas.
+- ABMC de planes, clases, horarios y membresías.
 
 ### Pendiente
 
@@ -159,7 +161,7 @@ Al arrancar, el seeder crea los roles Administrador, Recepcionista, Entrenador, 
 
 ## Qué falta hacer
 
-- ABMC de Horarios, Membresías, Pagos y Turnos.
-- Subida del comprobante de los pagos.
+- ABMC de Pagos, con subida del comprobante.
+- ABMC de Turnos.
 - ABM con Vue.js vía AJAX.
-- API con JWT y colección de Postman.s
+- API con JWT y colección de Postman.
