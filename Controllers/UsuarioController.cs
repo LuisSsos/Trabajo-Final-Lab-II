@@ -9,7 +9,7 @@ using Gimnasio.Data;
 
 namespace Gimnasio.Controllers;
 
-[Authorize(Roles = Roles.Administrador + "," + Roles.Recepcionista)]
+[Authorize(Roles = Roles.Administrador)]
 public class UsuarioController : Controller
 {
     private const int TamanoPagina = 10;
