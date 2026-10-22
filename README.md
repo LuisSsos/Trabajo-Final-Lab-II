@@ -28,6 +28,8 @@ Un cliente no puede reservar dos veces el mismo horario en la misma fecha: hay u
 Al eliminar un usuario empleado se elimina también su registro de Empleado y, en cascada, sus clases y los horarios de esas clases.
 
 ### Diagrama entidad-relación
+El siguiente diagrama representa las entidades principales de la base de datos del sistema Gimnasio y sus relaciones.
+![Diagrama de entidad-relación del sistema Gimnasio](BaseDatos/DER.jpeg)
 
 ## Estructura del proyecto
 
