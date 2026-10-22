@@ -28,7 +28,7 @@
         {
             <div class="table-responsive">
 
-                <table class="table table-striped table-hover align-middle">
+                <table class="table table-hover align-middle mb-0">
 
                     <thead>
                         <tr>
@@ -51,21 +51,15 @@
                                 <td>@clase.CupoMaximo</td>
                                 <td>
 
-                                    <a asp-action="Detalles"
-                                       asp-route-id="@clase.Id"
-                                       class="btn btn-sm btn-info">
+                                    <a asp-action="Detalles" asp-route-id="@clase.Id" class="btn btn-sm btn-outline-primary">
                                         Ver
                                     </a>
 
-                                    <a asp-action="Editar"
-                                       asp-route-id="@clase.Id"
-                                       class="btn btn-sm btn-warning">
+                                    <a asp-action="Editar" asp-route-id="@clase.Id" class="btn btn-sm btn-outline-primary">
                                         Editar
                                     </a>
 
-                                    <a asp-action="Eliminar"
-                                       asp-route-id="@clase.Id"
-                                       class="btn btn-sm btn-danger">
+                                    <a asp-action="Eliminar" asp-route-id="@clase.Id" class="btn btn-sm btn-outline-danger">
                                         Eliminar
                                     </a>
 

@@ -47,7 +47,7 @@
                             </a>
                         </li>
 
-                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador))
+                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador) || User.IsInRole(Gimnasio.Models.Roles.Recepcionista))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Usuario" asp-action="Index">
@@ -72,10 +72,7 @@
                                     Horarios
                                 </a>
                             </li>
-                        }
-
-                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador) || User.IsInRole(Gimnasio.Models.Roles.Recepcionista))
-                        {
+                        
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Membresia" asp-action="Index">
                                     Membresías

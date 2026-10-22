@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gimnasio.Controllers;
 
-[Authorize(Roles = Roles.Administrador)]
+[Authorize(Roles = Roles.Administrador  + "," + Roles.Recepcionista)]
 public class PlanController : Controller
 {
     private const int TamanoPagina = 10;
