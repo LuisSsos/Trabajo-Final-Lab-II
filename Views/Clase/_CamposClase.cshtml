@@ -20,9 +20,25 @@
 
 <div class="mb-3 position-relative">
     <label asp-for="NombreEntrenador" class="form-label"></label>
+
     <input asp-for="NombreEntrenador" class="form-control" autocomplete="off"
-           placeholder="Escribí el nombre o apellido del entrenador" />
+           placeholder="Escribí el nombre o apellido del entrenador" v-model="terminoEntrenador"
+    @@focus="buscarEntrenadores" @@input="programarBusqueda" />
+
     <input type="hidden" asp-for="EmpleadoId" />
-    <div id="resultadosEntrenador" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10;"></div>
+
+    <div class="list-group position-absolute w-100 shadow-sm" style="z-index: 10;"
+         v-if="entrenadores.length > 0 || buscandoEntrenadores">
+
+        <div v-if="buscandoEntrenadores" class="list-group-item text-muted">
+            Buscando entrenadores...
+        </div>
+
+        <button v-for="entrenador in entrenadores" :key="entrenador.id" type="button"
+                class="list-group-item list-group-item-action" @@click="seleccionarEntrenador(entrenador)">
+            {{ entrenador.nombre }}
+        </button>
+    </div>
+
     <span asp-validation-for="EmpleadoId" class="text-danger"></span>
 </div>

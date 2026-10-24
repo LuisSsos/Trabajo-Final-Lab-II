@@ -1,54 +1,164 @@
 <script>
-    const buscador = document.getElementById("NombreEntrenador");
-    const campoId = document.getElementById("EmpleadoId");
-    const resultados = document.getElementById("resultadosEntrenador");
-    let temporizador;
+    (() => {
+        const contenedor = document.getElementById("crearClaseApp");
 
-    async function buscar() {
-        const termino = buscador.value.trim();
-        const url = "@Url.Action("BuscarEntrenadores", "Clase")" + "?termino=" + encodeURIComponent(termino);
-
-        const respuesta = await fetch(url);
-        const entrenadores = await respuesta.json();
-
-        resultados.innerHTML = "";
-
-        if (entrenadores.length === 0) {
-            const vacio = document.createElement("div");
-            vacio.className = "list-group-item text-muted";
-            vacio.textContent = "No se encontraron entrenadores";
-            resultados.appendChild(vacio);
+        if (!contenedor) {
+            console.error("No se encontró crearClaseApp.");
             return;
         }
 
-        for (const entrenador of entrenadores) {
-            const opcion = document.createElement("button");
-            opcion.type = "button";
-            opcion.className = "list-group-item list-group-item-action";
-            opcion.textContent = entrenador.nombre;
+        const urlBuscarEntrenadores =
+            "@Url.Action("BuscarEntrenadores", "Clase")";
 
-            opcion.addEventListener("click", () => {
-                buscador.value = entrenador.nombre;
-                campoId.value = entrenador.id;
-                resultados.innerHTML = "";
-            });
+        const campoEntrenadorInicial =
+            document.getElementById("NombreEntrenador");
 
-            resultados.appendChild(opcion);
-        }
-    }
+        const nombreEntrenadorInicial =
+            campoEntrenadorInicial?.getAttribute("value") ?? "";
 
-    buscador.addEventListener("focus", buscar);
+        Vue.createApp({
+            data() {
+                return {
+                    enviando: false,
+                    mensajeError: "",
+                    errores: [],
+                    terminoEntrenador: nombreEntrenadorInicial,
+                    entrenadores: [],
+                    entrenadorSeleccionado: false,
+                    buscandoEntrenadores: false,
+                    temporizador: null
+                };
+            },
 
-    buscador.addEventListener("input", () => {
-        // si se vuelve a escribir, hay que elegir de nuevo de la lista
-        campoId.value = "";
-        clearTimeout(temporizador);
-        temporizador = setTimeout(buscar, 300);
-    });
+            mounted() {
+                const campo = document.getElementById("NombreEntrenador");
 
-    document.addEventListener("click", (evento) => {
-        if (evento.target !== buscador) {
-            resultados.innerHTML = "";
-        }
-    });
+                if (campo) {
+                    this.terminoEntrenador = campo.value;
+                }
+
+                this.manejarClickFuera = (evento) => {
+                    const campoEntrenador =
+                        document.getElementById("NombreEntrenador");
+
+                    const contenedorBuscador =
+                        campoEntrenador?.closest(".position-relative");
+
+                    if (
+                        contenedorBuscador &&
+                        !contenedorBuscador.contains(evento.target)
+                    ) {
+                        this.entrenadores = [];
+                    }
+                };
+
+                document.addEventListener("click", this.manejarClickFuera);
+            },
+
+            beforeUnmount() {
+                if (this.manejarClickFuera) {
+                    document.removeEventListener(
+                        "click",
+                        this.manejarClickFuera
+                    );
+                }
+
+                clearTimeout(this.temporizador);
+            },
+
+            methods: {
+                async buscarEntrenadores() {
+                    this.buscandoEntrenadores = true;
+
+                    try {
+                        const url = urlBuscarEntrenadores
+                            + "?termino="
+                            + encodeURIComponent(this.terminoEntrenador);
+
+                        const respuesta = await fetch(url);
+
+                        if (!respuesta.ok) {
+                            throw new Error("Error HTTP " + respuesta.status);
+                        }
+
+                        this.entrenadores = await respuesta.json();
+                    } catch (error) {
+                        console.error("Error al buscar entrenadores:", error);
+                        this.entrenadores = [];
+                    } finally {
+                        this.buscandoEntrenadores = false;
+                    }
+                },
+
+                programarBusqueda() {
+                    this.entrenadorSeleccionado = false;
+
+                    const campoId = document.getElementById("EmpleadoId");
+                    if (campoId) {
+                        campoId.value = "";
+                    }
+
+                    clearTimeout(this.temporizador);
+                    this.temporizador = setTimeout(
+                        () => this.buscarEntrenadores(),
+                        300
+                    );
+                },
+
+                seleccionarEntrenador(entrenador) {
+                    this.terminoEntrenador = entrenador.nombre;
+                    this.entrenadorSeleccionado = true;
+                    this.entrenadores = [];
+
+                    const campoId = document.getElementById("EmpleadoId");
+                    if (campoId) {
+                        campoId.value = entrenador.id;
+                    }
+                },
+
+                async crearClase(evento) {
+                    if (this.enviando) return;
+
+                    this.enviando = true;
+                    this.mensajeError = "";
+                    this.errores = [];
+
+                    try {
+                        const formulario = evento.target;
+                        const datosFormulario = new FormData(formulario);
+
+                        const respuesta = await fetch(formulario.action, {
+                            method: "POST",
+                            body: datosFormulario,
+                            headers: {
+                                "X-Requested-With": "XMLHttpRequest"
+                            }
+                        });
+
+                        const datos = await respuesta.json();
+
+                        if (!respuesta.ok || !datos.success) {
+                            this.mensajeError =
+                                datos.mensaje || "No se pudo crear la clase.";
+
+                            if (datos.errores) {
+                                this.errores =
+                                    Object.values(datos.errores).flat();
+                            }
+
+                            return;
+                        }
+
+                        window.location.href = datos.redirectUrl;
+                    } catch (error) {
+                        console.error("Error al crear la clase:", error);
+                        this.mensajeError =
+                            "No se pudo comunicar con el servidor. Intentá nuevamente.";
+                    } finally {
+                        this.enviando = false;
+                    }
+                }
+            }
+        }).mount("#crearClaseApp");
+    })();
 </script>

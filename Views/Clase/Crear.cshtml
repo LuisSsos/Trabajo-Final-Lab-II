@@ -4,32 +4,52 @@
     ViewData["Title"] = "Nueva clase";
 }
 
-<h1>Nueva clase</h1>
+<div id="crearClaseApp" v-cloak>
+    <h1>Nueva clase</h1>
 
-<hr />
+    <p class="text-muted">
+        Completá los datos para registrar una nueva clase.
+    </p>
 
-<div class="row">
-    <div class="col-md-6">
+    <hr />
 
-        <form asp-action="Crear" method="post">
+    <div class="row">
+        <div class="col-md-6">
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <form asp-action="Crear" method="post" @@submit.prevent="crearClase">
 
-            <partial name="_CamposClase" model="Model" />
+                <div v-if="mensajeError" class="alert alert-danger">
+                    {{ mensajeError }}
+                    <ul v-if="errores.length > 0" class="mb-0 mt-2">
+                        <li v-for="(error, indice) in errores" :key="indice">
+                            {{ error }}
+                        </li>
+                    </ul>
+                </div>
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Crear clase</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-            </div>
+                <div v-if="enviando" class="alert alert-info">
+                    Guardando clase...
+                </div>
 
-        </form>
+                <partial name="_CamposClase" model="Model" />
 
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" :disabled="enviando">
+                        {{ enviando ? 'Guardando...' : 'Crear clase' }}
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script src="~/lib/vue/vue.global.prod.js"></script>
     <partial name="_ScriptsClase" />
 }

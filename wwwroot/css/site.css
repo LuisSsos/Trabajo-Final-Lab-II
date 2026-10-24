@@ -330,3 +330,7 @@ Accesibilidad y movimiento
         animation-iteration-count: 1 !important;
     }
 }
+
+[v-cloak] {
+    display: none !important;
+}

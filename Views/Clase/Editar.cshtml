@@ -4,34 +4,58 @@
     ViewData["Title"] = "Editar clase";
 }
 
-<h1>Editar clase</h1>
+<div id="crearClaseApp" v-cloak>
+    <h1>Editar clase</h1>
 
-<hr />
+    <p class="text-muted">
+        Modificá los datos de la clase y guardá los cambios.
+    </p>
 
-<div class="row">
-    <div class="col-md-6">
+    <hr />
 
-        <form asp-action="Editar" method="post">
+    <div class="row">
+        <div class="col-md-6">
 
-            <input type="hidden" asp-for="Id" />
+            <form asp-action="Editar" asp-route-id="@Model.Id"
+                  method="post" @@submit.prevent="crearClase">
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
 
-            <partial name="_CamposClase" model="Model" />
+                <div v-if="mensajeError" class="alert alert-danger">
+                    {{ mensajeError }}
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-            </div>
+                    <ul v-if="errores.length > 0" class="mb-0 mt-2">
+                        <li v-for="(error, indice) in errores" :key="indice">
+                            {{ error }}
+                        </li>
+                    </ul>
+                </div>
 
-        </form>
+                <div v-if="enviando" class="alert alert-info">
+                    Guardando cambios...
+                </div>
 
+                <partial name="_CamposClase" model="Model" />
+
+                <div class="mt-4">
+                    <button type="submit"
+                            class="btn btn-primary"
+                            :disabled="enviando">
+                        {{ enviando ? 'Guardando...' : 'Guardar cambios' }}
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script src="~/lib/vue/vue.global.prod.js"></script>
     <partial name="_ScriptsClase" />
 }

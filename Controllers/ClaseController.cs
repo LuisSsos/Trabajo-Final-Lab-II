@@ -57,6 +57,41 @@ public class ClaseController : Controller
         return View(clases);
     }
 
+
+    [HttpGet]
+    public async Task<IActionResult> ListarAjax(int pagina = 1)
+    {
+        var total = await _contexto.Clases.CountAsync();
+        var totalPaginas = Math.Max(
+            1,
+            (int)Math.Ceiling(total / (double)TamanoPagina)
+        );
+
+        if (pagina < 1)
+        {
+            pagina = 1;
+        }
+        else if (pagina > totalPaginas)
+        {
+            pagina = totalPaginas;
+        }
+
+        var clases = await _contexto.Clases
+            .OrderBy(c => c.Id)
+            .Skip((pagina - 1) * TamanoPagina)
+            .Take(TamanoPagina)
+            .Select(Proyeccion)
+            .ToListAsync();
+
+        return Json(new
+        {
+            items = clases,
+            paginaActual = pagina,
+            totalPaginas
+        });
+    }
+
+
     // Lo llama el buscador de la pantalla con ajax.
     [HttpGet]
     public async Task<IActionResult> BuscarEntrenadores(string? termino)
@@ -108,7 +143,21 @@ public class ClaseController : Controller
 
         if (!ModelState.IsValid)
         {
-            return View(modelo);
+            var errores = ModelState
+                .Where(campo => campo.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    campo => campo.Key,
+                    campo => campo.Value!.Errors
+                        .Select(error => error.ErrorMessage)
+                        .ToArray()
+                );
+
+            return BadRequest(new
+            {
+                success = false,
+                mensaje = "Revisá los datos ingresados.",
+                errores
+            });
         }
 
         var clase = new Clase
@@ -122,7 +171,12 @@ public class ClaseController : Controller
         _contexto.Clases.Add(clase);
         await _contexto.SaveChangesAsync();
 
-        return RedirectToAction(nameof(Index));
+        return Json(new
+        {
+            success = true,
+            mensaje = "La clase se creó correctamente.",
+            redirectUrl = Url.Action(nameof(Index))
+        });
     }
 
     [HttpGet]
@@ -147,21 +201,43 @@ public class ClaseController : Controller
     {
         if (id != modelo.Id)
         {
-            return BadRequest();
+            return BadRequest(new
+            {
+                success = false,
+                mensaje = "El identificador de la clase no coincide."
+            });
         }
 
         await ValidarEntrenadorAsync(modelo);
 
         if (!ModelState.IsValid)
         {
-            return View(modelo);
+            var errores = ModelState
+                .Where(campo => campo.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    campo => campo.Key,
+                    campo => campo.Value!.Errors
+                        .Select(error => error.ErrorMessage)
+                        .ToArray()
+                );
+
+            return BadRequest(new
+            {
+                success = false,
+                mensaje = "Revisá los datos ingresados.",
+                errores
+            });
         }
 
         var clase = await _contexto.Clases.FindAsync(id);
 
         if (clase == null)
         {
-            return NotFound();
+            return NotFound(new
+            {
+                success = false,
+                mensaje = "No se encontró la clase que intentás editar."
+            });
         }
 
         clase.Nombre = modelo.Nombre;
@@ -171,7 +247,12 @@ public class ClaseController : Controller
 
         await _contexto.SaveChangesAsync();
 
-        return RedirectToAction(nameof(Index));
+        return Json(new
+        {
+            success = true,
+            mensaje = "La clase se actualizó correctamente.",
+            redirectUrl = Url.Action(nameof(Index))
+        });
     }
 
     [HttpGet]
@@ -194,28 +275,42 @@ public class ClaseController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EliminarConfirmado(int id)
     {
+        bool esAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
         var clase = await _contexto.Clases.FindAsync(id);
 
         if (clase == null)
         {
+            if (esAjax)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    mensaje = "No se encontró la clase que intentás eliminar."
+                });
+            }
+
             return NotFound();
         }
 
-        // si se borra una clase con horarios, se pierden sus turnos
-        if (await _contexto.Horarios.AnyAsync(h => h.ClaseId == id))
-        {
-            ModelState.AddModelError("", "No se puede eliminar la clase porque tiene horarios asociados.");
+        var horarios = await _contexto.Horarios
+            .Where(h => h.ClaseId == id)
+            .ToListAsync();
 
-            var modelo = await _contexto.Clases
-                .Where(c => c.Id == id)
-                .Select(Proyeccion)
-                .FirstAsync();
-
-            return View("Eliminar", modelo);
-        }
-
+        _contexto.Horarios.RemoveRange(horarios);
         _contexto.Clases.Remove(clase);
+
         await _contexto.SaveChangesAsync();
+
+        if (esAjax)
+        {
+            return Json(new
+            {
+                success = true,
+                mensaje = "La clase y sus horarios asociados se eliminaron correctamente.",
+                id
+            });
+        }
 
         return RedirectToAction(nameof(Index));
     }
