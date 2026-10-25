@@ -288,8 +288,10 @@ CREATE TABLE `Clientes` (
   `UsuarioId` int(11) NOT NULL,
   `FechaNacimiento` datetime(6) NOT NULL,
   `AptoMedico` longtext DEFAULT NULL,
+  `Dni` varchar(9) DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `IX_Clientes_UsuarioId` (`UsuarioId`),
+  UNIQUE KEY `IX_Clientes_Dni` (`Dni`),
   CONSTRAINT `FK_Clientes_AspNetUsers_UsuarioId` FOREIGN KEY (`UsuarioId`) REFERENCES `AspNetUsers` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

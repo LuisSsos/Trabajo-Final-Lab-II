@@ -122,6 +122,17 @@ public class UsuarioController : Controller
             {
                 ModelState.AddModelError(nameof(modelo.FechaNacimiento), "La fecha de nacimiento no parece valida.");
             }
+
+            modelo.Dni = modelo.Dni?.Trim();
+
+            if (string.IsNullOrWhiteSpace(modelo.Dni))
+            {
+                ModelState.AddModelError(nameof(modelo.Dni), "Tenes que ingresar el DNI del cliente.");
+            }
+            else if (await _contexto.Clientes.AnyAsync(c => c.Dni == modelo.Dni))
+            {
+                ModelState.AddModelError(nameof(modelo.Dni), "Ya existe un cliente con ese DNI.");
+            }
         }
 
         ValidarAvatar(modelo.ArchivoAvatar);
@@ -160,6 +171,7 @@ public class UsuarioController : Controller
             usuario.Cliente = new Cliente
             {
                 FechaNacimiento = modelo.FechaNacimiento!.Value,
+                Dni = modelo.Dni,
                 AptoMedico = rutaAptoMedico
             };
         }
@@ -250,6 +262,14 @@ public class UsuarioController : Controller
         modelo.EsCliente = await _userManager.IsInRoleAsync(
             usuario, Roles.Cliente);
 
+        if (modelo.EsCliente)
+        {
+            modelo.Dni = await _contexto.Clientes
+                .Where(c => c.UsuarioId == usuario.Id)
+                .Select(c => c.Dni)
+                .FirstOrDefaultAsync();
+        }
+
         return View(modelo);
     }
 
@@ -276,6 +296,20 @@ public class UsuarioController : Controller
         ModelState.Remove(nameof(modelo.Rol));
 
         ValidarAvatar(modelo.ArchivoAvatar);
+
+        modelo.Dni = modelo.Dni?.Trim();
+
+        if (modelo.EsCliente)
+        {
+            if (string.IsNullOrWhiteSpace(modelo.Dni))
+            {
+                ModelState.AddModelError(nameof(modelo.Dni), "Tenes que ingresar el DNI del cliente.");
+            }
+            else if (await _contexto.Clientes.AnyAsync(c => c.Dni == modelo.Dni && c.UsuarioId != usuario.Id))
+            {
+                ModelState.AddModelError(nameof(modelo.Dni), "Ya existe un cliente con ese DNI.");
+            }
+        }
 
         // El archivo médico solo se admite para clientes.
         if (!modelo.EsCliente && modelo.ArchivoAptoMedico != null)
@@ -364,6 +398,11 @@ public class UsuarioController : Controller
             usuario.UserName = modelo.Email;
             usuario.PhoneNumber = modelo.Telefono;
 
+            if (cliente != null)
+            {
+                cliente.Dni = modelo.Dni;
+            }
+
             var resultado = await _userManager.UpdateAsync(usuario);
 
             if (!resultado.Succeeded)
@@ -376,7 +415,7 @@ public class UsuarioController : Controller
                 return View(modelo);
             }
 
-            if (cliente != null && nuevoApto != null)
+            if (cliente != null)
             {
                 await _contexto.SaveChangesAsync();
             }

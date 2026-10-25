@@ -1,18 +1,19 @@
 # Gimnasio - Trabajo Final Laboratorio II
 
-Sitio web para administrar un gimnasio, hecho con ASP.NET Core MVC. Permite gestionar usuarios, clientes, empleados, planes, membresías, pagos, clases, horarios y turnos.
+Sitio web para administrar un gimnasio, hecho con ASP.NET Core MVC. Permite gestionar usuarios, clientes, empleados, planes, membresías, pagos, clases, horarios y turnos, y controlar el ingreso de los clientes al local por DNI.
 
 ## Tecnologías
 
 - ASP.NET Core MVC (.NET 10)
 - Entity Framework Core con MariaDB/MySQL (paquete Microting.EntityFrameworkCore.MySql)
 - ASP.NET Core Identity para login, usuarios y roles
+- Vue.js (archivo local en `wwwroot/lib/vue`) para el ABM de clases
 
 ## Modelo de datos
 
 Entidades propias:
 
-- **Cliente**: datos propios del cliente (fecha de nacimiento, apto médico). Se relaciona 1 a 1 con un usuario.
+- **Cliente**: datos propios del cliente (DNI, fecha de nacimiento, apto médico). Se relaciona 1 a 1 con un usuario. El DNI es único.
 - **Empleado**: datos propios del empleado (cargo). Se relaciona 1 a 1 con un usuario.
 - **Plan**: planes de suscripción (nombre, precio, duración en días).
 - **Membresía**: un cliente tiene un plan durante un período, con su estado. La fecha de fin se calcula sola sumando la duración del plan a la fecha de inicio.
@@ -25,7 +26,7 @@ Las tablas que empiezan con `AspNet` las crea Identity. `AspNetUsers` es nuestra
 
 Un cliente no puede reservar dos veces el mismo horario en la misma fecha: hay un índice único en Turnos (`HorarioId`, `ClienteId`, `Fecha`).
 
-Al eliminar un usuario empleado se elimina también su registro de Empleado y, en cascada, sus clases y los horarios de esas clases.
+Al eliminar un usuario empleado se elimina también su registro de Empleado y, en cascada, sus clases y los horarios de esas clases. Al eliminar una clase se eliminan también sus horarios.
 
 ### Diagrama entidad-relación
 El siguiente diagrama representa las entidades principales de la base de datos del sistema Gimnasio y sus relaciones.
@@ -33,13 +34,14 @@ El siguiente diagrama representa las entidades principales de la base de datos d
 
 ## Estructura del proyecto
 
-- **Controllers/**: CuentaController (login y logout), UsuarioController (ABMC de usuarios con paginado, avatar y apto médico), PlanController (ABMC de planes), ClaseController (ABMC de clases con búsqueda AJAX de entrenador), HorarioController (ABMC de horarios), MembresiaController (ABMC de membresías con búsqueda AJAX de cliente) y HomeController.
-- **Services/ServicioArchivos.cs**: guarda y borra los archivos subidos (avatares y aptos médicos).
+- **Controllers/**: CuentaController (login y logout), UsuarioController (ABMC de usuarios con paginado, avatar, DNI y apto médico), PlanController (ABMC de planes), ClaseController (ABM de clases con Vue.js y búsqueda AJAX de entrenador), HorarioController (ABMC de horarios), MembresiaController (ABMC de membresías con búsqueda AJAX de cliente), PagoController (ABMC de pagos con comprobante y búsqueda AJAX de membresía), IngresoController (ingreso de clientes por DNI) y HomeController.
+- **Services/ServicioArchivos.cs**: guarda y borra los archivos subidos (avatares, aptos médicos y comprobantes de pago).
 - **wwwroot/uploads/**: carpeta donde se guardan los archivos subidos. Se crea sola y no se sube al repositorio.
+- **wwwroot/lib/vue/**: archivo local de Vue.js.
 - **Data/ContextoDatos.cs**: conecta las clases con la base de datos y define reglas de las tablas.
 - **Data/SemillaDatos.cs**: al arrancar la app crea los roles y el usuario administrador si no existen.
 - **Models/**: las clases de las entidades, los enums (EstadoMembresia, EstadoTurno, MetodoPago) y los roles (Roles.cs).
-- **Models/ViewModels/**: modelos usados en las vistas (UsuarioViewModel, ClaseViewModel, HorarioViewModel y MembresiaViewModel).
+- **Models/ViewModels/**: modelos usados en las vistas (UsuarioViewModel, ClaseViewModel, HorarioViewModel, MembresiaViewModel, PagoViewModel e IngresoViewModel).
 - **Views/**: vistas simples.
 - **BaseDatos/gimnasio.sql**: exportación de la base de datos.
 - **Program.cs**: configuración de la app (base de datos, Identity, cookies de login, archivos estáticos).
@@ -104,6 +106,13 @@ sudo mariadb gimnasio < BaseDatos/gimnasio.sql
 
 Se puede importar el archivo `BaseDatos/gimnasio.sql` desde MySQL Workbench, phpMyAdmin o la consola de MariaDB/MySQL.
 
+Si la base ya estaba creada antes de agregar el DNI de los clientes, hay que agregar la columna a mano:
+
+```sql
+ALTER TABLE Clientes ADD COLUMN Dni varchar(9) NULL;
+ALTER TABLE Clientes ADD UNIQUE KEY IX_Clientes_Dni (Dni);
+```
+
 ### 4. Revisar la conexión
 
 Verificar que el connection string de `appsettings.json` coincida con el usuario, contraseña, servidor y base de datos configurados.
@@ -138,9 +147,19 @@ Al arrancar, el seeder crea los roles Administrador, Recepcionista, Entrenador, 
 
 - El login usa Identity con cookies. Si alguien intenta acceder sin iniciar sesión, se lo redirige a `/Cuenta/Login`.
 - `UsuarioController`, `PlanController`, `ClaseController` y `HorarioController` solo pueden ser utilizados por el rol Administrador.
-- `MembresiaController` puede ser utilizado por los roles Administrador y Recepcionista.
+- `MembresiaController`, `PagoController` e `IngresoController` pueden ser utilizados por los roles Administrador y Recepcionista.
 - Quien esté logueado sin el rol necesario verá la pantalla de acceso denegado.
 - Las contraseñas se guardan hasheadas con Identity.
+
+## Ingreso de clientes por DNI
+
+Desde la pantalla de inicio, el Administrador y el Recepcionista tienen el botón "Para clientes", que abre la pantalla de ingreso. El cliente escribe su DNI y el sistema muestra su foto de perfil, su nombre y un cartel de color según el estado de su plan:
+
+- - **Verde**: la membresía está vigente, el plan está pagado por completo (la suma de sus pagos alcanza el precio del plan) y le quedan más de 5 días. Puede ingresar.
+- **Amarillo**: la membresía está vigente y pagada por completo, pero vence en 5 días o menos. Puede ingresar y se le avisa cuántos días le quedan.
+- **Rojo**: el DNI no está registrado, no tiene membresía, su membresía está vencida o cancelada, o está vigente pero sin ningún pago registrado. No puede ingresar y debe pasar por recepción.
+
+La cantidad de días del aviso amarillo está en la constante `DiasAviso` de `Controllers/IngresoController.cs`. La pantalla solo consulta: no guarda registro de asistencia.
 
 ## Requisitos mínimos
 
@@ -148,22 +167,20 @@ Al arrancar, el seeder crea los roles Administrador, Recepcionista, Entrenador, 
 
 - Al menos 4 tablas relacionadas, con una relación 1 a muchos. Está en `Models/` y `Data/ContextoDatos.cs`.
 - Login con `Authorize` y roles. Está en `Controllers/CuentaController.cs`, `Program.cs` y `Data/SemillaDatos.cs`.
-- Funcionalidad restringida por rol. Está en los controladores de usuarios, planes, clases, horarios y membresías.
+- Funcionalidad restringida por rol. Está en los controladores de usuarios, planes, clases, horarios, membresías, pagos e ingreso.
 - Avatar en los usuarios. Se sube al crear o editar un usuario y se muestra en el listado y en el detalle. Está en `Controllers/UsuarioController.cs` y `Services/ServicioArchivos.cs`.
-- Uso de archivos además del avatar: apto médico del cliente, que se sube al crear o editar un cliente. Está en `Controllers/UsuarioController.cs`.
+- Uso de archivos además del avatar: apto médico del cliente (se sube al crear o editar un cliente, en `UsuarioController`) y comprobante de los pagos (se sube al registrar o editar un pago, en `PagoController`).
 - Listados con paginado del lado del servidor (10 por página, con `Skip` y `Take`). Está en todos los listados de los controladores ya mencionados.
-- Selección de entidades relacionadas con búsqueda AJAX: al crear o editar una clase se busca el entrenador escribiendo su nombre, y al crear o editar una membresía se busca el cliente. Está en `ClaseController` (`BuscarEntrenadores`), `MembresiaController` (`BuscarClientes`) y sus vistas.
-- ABMC de planes, clases, horarios y membresías.
+- Selección de entidades relacionadas con búsqueda AJAX: al crear o editar una clase se busca el entrenador, al crear o editar una membresía se busca el cliente y al registrar un pago se busca la membresía. Está en `ClaseController` (`BuscarEntrenadores`), `MembresiaController` (`BuscarClientes`), `PagoController` (`BuscarMembresias`) y sus vistas.
+- ABM con Vue.js vía AJAX: el ABM de clases (listado con paginado, alta, edición y baja) funciona sin recargar la página. Está en `Controllers/ClaseController.cs` y `Views/Clase/`.
+- ABMC de planes, clases, horarios, membresías y pagos.
+- Ingreso de clientes por DNI con cartel de color (verde, amarillo o rojo) y foto de perfil.
 
 ### Pendiente
 
-- Uso de archivos: el campo `Comprobante` (Pago) ya está creado, falta la subida.
-- ABM con Vue.js vía AJAX.
 - API con JWT y colección de Postman.
 
 ## Qué falta hacer
 
-- ABMC de Pagos, con subida del comprobante.
 - ABMC de Turnos.
-- ABM con Vue.js vía AJAX.
 - API con JWT y colección de Postman.

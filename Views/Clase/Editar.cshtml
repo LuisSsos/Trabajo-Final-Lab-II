@@ -17,7 +17,7 @@
         <div class="col-md-6">
 
             <form asp-action="Editar" asp-route-id="@Model.Id"
-                  method="post" @@submit.prevent="crearClase">
+                  method="post" v-on:submit.prevent="crearClase">
 
                 <input type="hidden" asp-for="Id" />
 

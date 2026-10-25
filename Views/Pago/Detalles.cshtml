@@ -1,0 +1,53 @@
+@model Gimnasio.Models.ViewModels.PagoViewModel
+
+@{
+    ViewData["Title"] = "Detalles del pago";
+}
+
+<h1>Detalles del pago</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Cliente</dt>
+            <dd class="col-sm-9">@Model.NombreCliente</dd>
+
+            <dt class="col-sm-3">Plan</dt>
+            <dd class="col-sm-9">@Model.NombrePlan</dd>
+
+            <dt class="col-sm-3">Monto</dt>
+            <dd class="col-sm-9">$@Model.Monto?.ToString("N2")</dd>
+
+            <dt class="col-sm-3">Fecha</dt>
+            <dd class="col-sm-9">@Model.Fecha?.ToString("dd/MM/yyyy")</dd>
+
+            <dt class="col-sm-3">Método de pago</dt>
+            <dd class="col-sm-9">@Model.Metodo</dd>
+
+            <dt class="col-sm-3">Comprobante</dt>
+            <dd class="col-sm-9">
+                @if (string.IsNullOrWhiteSpace(Model.Comprobante))
+                {
+                    <span>Sin comprobante</span>
+                }
+                else
+                {
+                    <a href="@Model.Comprobante" target="_blank">Ver comprobante</a>
+                }
+            </dd>
+
+        </dl>
+
+        <div class="mt-4">
+
+            <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Volver</a>
+
+        </div>
+
+    </div>
+</div>

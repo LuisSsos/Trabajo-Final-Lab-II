@@ -1,0 +1,53 @@
+@model Gimnasio.Models.ViewModels.IngresoViewModel
+
+@{
+    ViewData["Title"] = "Ingreso de clientes";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-6">
+
+        <h1 class="text-center mb-4">Ingreso de clientes</h1>
+
+        @if (Model.Consultado)
+        {
+            <div class="card shadow mb-4 text-center bg-@Model.Color @(Model.Color == "warning" ? "text-dark" : "text-white")">
+                <div class="card-body p-4">
+
+                    @if (Model.Persona != null)
+                    {
+                        <div class="mb-3">
+                            @{ ViewData["Tamano"] = 180; }
+                            <partial name="_Avatar" model="Model.Persona" />
+                        </div>
+
+                        <p class="fs-5 mb-1">@Model.Persona.Nombre @Model.Persona.Apellido</p>
+                    }
+
+                    <h2 class="display-6 fw-bold">@Model.Titulo</h2>
+                    <p class="fs-4 mb-0">@Model.Mensaje</p>
+
+                </div>
+            </div>
+        }
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+
+                <form asp-action="Index" method="post">
+
+                    <label for="dni" class="form-label fs-5">Ingresá tu DNI</label>
+
+                    <input type="text" id="dni" name="dni" class="form-control form-control-lg text-center"
+                           inputmode="numeric" maxlength="9" autocomplete="off" autofocus
+                           placeholder="Solo números, sin puntos" />
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">Ingresar</button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

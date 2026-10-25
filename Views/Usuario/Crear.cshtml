@@ -148,6 +148,20 @@
                                 </div>
                             </div>
 
+                            <div class="col-md-6 mb-3" id="campoDni">
+
+                                <label asp-for="Dni" class="form-label"></label>
+
+                                <input asp-for="Dni" class="form-control" inputmode="numeric" maxlength="9"
+                                       placeholder="Solo números, sin puntos" />
+
+                                <span asp-validation-for="Dni" class="text-danger small"></span>
+
+                                <div class="form-text">
+                                    Campo requerido para los clientes. Se usa para el ingreso al gimnasio.
+                                </div>
+                            </div>
+
                             <div class="col-md-6 mb-3" id="campoFechaNacimiento">
 
                                 <label asp-for="FechaNacimiento" class="form-label">
@@ -215,12 +229,14 @@
     <script>
         const selectorRol = document.getElementById("Rol");
         const campoFecha = document.getElementById("campoFechaNacimiento");
+        const campoDni = document.getElementById("campoDni");
         const campoAptoMedico = document.getElementById("campoAptoMedico");
 
         function mostrarCampos() {
             const esCliente = selectorRol.value === "Cliente";
 
             campoFecha.style.display = esCliente ? "" : "none";
+            campoDni.style.display = esCliente ? "" : "none";
             campoAptoMedico.style.display = esCliente ? "" : "none";
         }
 

@@ -15,7 +15,7 @@
         <div>
             <h1>Clases</h1>
             <p class="text-muted mb-0">
-                Consultá y administrá las clases del gimnasio.
+                Consulta y administra las clases del gimnasio.
             </p>
         </div>
 
@@ -71,7 +71,7 @@
                                     </a>
 
                                     <button type="button" class="btn btn-sm btn-outline-danger"
-                                            :disabled="eliminandoId !== null" @@click="eliminarClase(clase)">
+                                            :disabled="eliminandoId !== null" v-on:click="eliminarClase(clase)">
                                         {{ eliminandoId === clase.id ? 'Eliminando...' : 'Eliminar' }}
                                     </button>
                                 </div>
@@ -86,7 +86,7 @@
                     <ul class="pagination mb-0">
                         <li class="page-item" :class="{ disabled: paginaActual <= 1 || cargando }">
                             <button type="button" class="page-link" :disabled="paginaActual <= 1 || cargando"
-                                @@click="cambiarPagina(paginaActual - 1)">
+                                v-on:click="cambiarPagina(paginaActual - 1)">
                                 Anterior
                             </button>
                         </li>
@@ -94,14 +94,14 @@
                         <li v-for="pagina in totalPaginas" :key="pagina" class="page-item"
                             :class="{ active: pagina === paginaActual }">
                             <button type="button" class="page-link" :disabled="cargando"
-                                @@click="cambiarPagina(pagina)">
+                                v-on:click="cambiarPagina(pagina)">
                                 {{ pagina }}
                             </button>
                         </li>
 
                         <li class="page-item" :class="{ disabled: paginaActual >= totalPaginas || cargando }">
                             <button type="button" class="page-link" :disabled="paginaActual >= totalPaginas || cargando"
-                                @@click="cambiarPagina(paginaActual + 1)">
+                                v-on:click="cambiarPagina(paginaActual + 1)">
                                 Siguiente
                             </button>
                         </li>

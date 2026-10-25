@@ -33,7 +33,9 @@ public class UsuarioViewModel
     [DataType(DataType.Date)]
     public DateTime? FechaNacimiento { get; set; }
 
-    [StringLength(80)]
+    [Display(Name = "DNI")]
+    [RegularExpression(@"^\d{7,9}$", ErrorMessage = "El DNI tiene que tener entre 7 y 9 números, sin puntos.")]
+    public string? Dni { get; set; }
 
     public IFormFile? ArchivoAptoMedico { get; set; }
     public bool EsCliente { get; set; }

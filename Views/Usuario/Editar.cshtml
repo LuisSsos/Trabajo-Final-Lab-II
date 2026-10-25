@@ -94,6 +94,12 @@
 
                     @if (Model.EsCliente)
                     {
+                        <div class="col-md-6">
+                            <label asp-for="Dni" class="form-label"></label>
+                            <input asp-for="Dni" class="form-control" inputmode="numeric" maxlength="9" />
+                            <span asp-validation-for="Dni" class="text-danger small"></span>
+                        </div>
+
                         <div class="col-12">
                             <hr class="my-2" />
                             <h3 class="h5 mb-3">Documentación médica</h3>

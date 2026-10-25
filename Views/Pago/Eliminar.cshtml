@@ -1,0 +1,46 @@
+@model Gimnasio.Models.ViewModels.PagoViewModel
+
+@{
+    ViewData["Title"] = "Eliminar pago";
+}
+
+<h1>Eliminar pago</h1>
+
+<hr />
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div class="alert alert-warning">
+            ¿Estás seguro de que querés eliminar este pago?
+            Esta acción no se puede deshacer.
+        </div>
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Cliente</dt>
+            <dd class="col-sm-9">@Model.NombreCliente</dd>
+
+            <dt class="col-sm-3">Monto</dt>
+            <dd class="col-sm-9">$@Model.Monto?.ToString("N2")</dd>
+
+            <dt class="col-sm-3">Fecha</dt>
+            <dd class="col-sm-9">@Model.Fecha?.ToString("dd/MM/yyyy")</dd>
+
+        </dl>
+
+        <form asp-action="EliminarConfirmado" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Id" />
+
+            <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+
+        </form>
+
+    </div>
+
+</div>

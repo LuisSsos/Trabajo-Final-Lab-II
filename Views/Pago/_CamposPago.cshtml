@@ -1,0 +1,45 @@
+@model Gimnasio.Models.ViewModels.PagoViewModel
+
+<div class="mb-3 position-relative">
+    <label asp-for="DescripcionMembresia" class="form-label"></label>
+    <input asp-for="DescripcionMembresia" class="form-control" autocomplete="off"
+           placeholder="Escribí el nombre o apellido del cliente" />
+    <input type="hidden" asp-for="MembresiaId" />
+    <div id="resultadosMembresia" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10;"></div>
+    <span asp-validation-for="MembresiaId" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Monto" class="form-label"></label>
+    <input asp-for="Monto" type="number" step="1" min="1" class="form-control"
+           value="@(Model.Monto.HasValue ? Model.Monto.Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+    <span asp-validation-for="Monto" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Fecha" class="form-label"></label>
+    <input asp-for="Fecha" type="date" class="form-control"
+           value="@(Model.Fecha.HasValue ? Model.Fecha.Value.ToString("yyyy-MM-dd") : "")" />
+    <span asp-validation-for="Fecha" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Metodo" class="form-label"></label>
+    <select asp-for="Metodo" asp-items="Html.GetEnumSelectList<Gimnasio.Models.MetodoPago>()" class="form-select"></select>
+    <span asp-validation-for="Metodo" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="ArchivoComprobante" class="form-label"></label>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Comprobante))
+    {
+        <div class="mb-2">
+            <a href="@Model.Comprobante" target="_blank">Ver comprobante actual</a>
+        </div>
+    }
+
+    <input asp-for="ArchivoComprobante" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf" />
+    <div class="form-text">Opcional. Imagen o PDF de hasta 5 MB. Si no elegís uno nuevo, se mantiene el actual.</div>
+    <span asp-validation-for="ArchivoComprobante" class="text-danger"></span>
+</div>

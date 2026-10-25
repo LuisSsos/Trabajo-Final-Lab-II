@@ -16,6 +16,9 @@ public class Cliente
     [Display(Name = "Apto médico")]
     public string? AptoMedico { get; set; }
 
+    [StringLength(9)]
+    public string? Dni { get; set; }
+
     public ICollection<Membresia> Membresias { get; set; } = new List<Membresia>();
     public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
 }

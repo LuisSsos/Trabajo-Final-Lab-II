@@ -23,7 +23,7 @@
 
     <input asp-for="NombreEntrenador" class="form-control" autocomplete="off"
            placeholder="Escribí el nombre o apellido del entrenador" v-model="terminoEntrenador"
-    @@focus="buscarEntrenadores" @@input="programarBusqueda" />
+    v-on:focus="buscarEntrenadores" v-on:input="programarBusqueda" />
 
     <input type="hidden" asp-for="EmpleadoId" />
 
@@ -35,7 +35,7 @@
         </div>
 
         <button v-for="entrenador in entrenadores" :key="entrenador.id" type="button"
-                class="list-group-item list-group-item-action" @@click="seleccionarEntrenador(entrenador)">
+                class="list-group-item list-group-item-action" v-on:click="seleccionarEntrenador(entrenador)">
             {{ entrenador.nombre }}
         </button>
     </div>

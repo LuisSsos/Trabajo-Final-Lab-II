@@ -34,6 +34,7 @@ public class ContextoDatos : IdentityDbContext<Usuario, IdentityRole<int>, int>
 
         modelBuilder.Entity<Plan>().Property(p => p.Precio).HasPrecision(12, 2);
         modelBuilder.Entity<Pago>().Property(p => p.Monto).HasPrecision(12, 2);
+        modelBuilder.Entity<Cliente>().HasIndex(c => c.Dni).IsUnique();
 
         modelBuilder.Entity<Turno>()
             .HasIndex(t => new { t.HorarioId, t.ClienteId, t.Fecha })

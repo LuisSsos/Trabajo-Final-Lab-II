@@ -16,7 +16,7 @@
     <div class="row">
         <div class="col-md-6">
 
-            <form asp-action="Crear" method="post" @@submit.prevent="crearClase">
+            <form asp-action="Crear" method="post" v-on:submit.prevent="crearClase">
 
                 <div v-if="mensajeError" class="alert alert-danger">
                     {{ mensajeError }}

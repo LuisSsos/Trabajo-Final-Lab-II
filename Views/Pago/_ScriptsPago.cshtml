@@ -1,0 +1,54 @@
+<script>
+    const buscador = document.getElementById("DescripcionMembresia");
+    const campoId = document.getElementById("MembresiaId");
+    const resultados = document.getElementById("resultadosMembresia");
+    let temporizador;
+
+    async function buscar() {
+        const termino = buscador.value.trim();
+        const url = "@Url.Action("BuscarMembresias", "Pago")" + "?termino=" + encodeURIComponent(termino);
+
+        const respuesta = await fetch(url);
+        const membresias = await respuesta.json();
+
+        resultados.innerHTML = "";
+
+        if (membresias.length === 0) {
+            const vacio = document.createElement("div");
+            vacio.className = "list-group-item text-muted";
+            vacio.textContent = "No se encontraron membresías";
+            resultados.appendChild(vacio);
+            return;
+        }
+
+        for (const membresia of membresias) {
+            const opcion = document.createElement("button");
+            opcion.type = "button";
+            opcion.className = "list-group-item list-group-item-action";
+            opcion.textContent = membresia.nombre;
+
+            opcion.addEventListener("click", () => {
+                buscador.value = membresia.nombre;
+                campoId.value = membresia.id;
+                resultados.innerHTML = "";
+            });
+
+            resultados.appendChild(opcion);
+        }
+    }
+
+    buscador.addEventListener("focus", buscar);
+
+    buscador.addEventListener("input", () => {
+        // si se vuelve a escribir, hay que elegir de nuevo de la lista
+        campoId.value = "";
+        clearTimeout(temporizador);
+        temporizador = setTimeout(buscar, 300);
+    });
+
+    document.addEventListener("click", (evento) => {
+        if (evento.target !== buscador) {
+            resultados.innerHTML = "";
+        }
+    });
+</script>
