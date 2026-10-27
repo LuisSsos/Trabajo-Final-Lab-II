@@ -72,9 +72,15 @@
                                     Horarios
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Turno" asp-action="Index">
+                                    Reservas
+                                </a>
+                            </li>
                         }
 
-                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador) || User.IsInRole(Gimnasio.Models.Roles.Recepcionista))
+                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador) ||
+                        User.IsInRole(Gimnasio.Models.Roles.Recepcionista))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Membresia" asp-action="Index">

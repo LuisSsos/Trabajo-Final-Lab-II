@@ -38,19 +38,13 @@
         }
         else
         {
-            <div id="carruselClases"
-                 class="carousel slide"
-                 data-bs-ride="carousel"
-                 data-bs-interval="5000">
+            <div id="carruselClases" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
 
                 <div class="carousel-indicators">
                     @for (int i = 0; i < Model.Count; i++)
                     {
-                        <button type="button"
-                                data-bs-target="#carruselClases"
-                                data-bs-slide-to="@i"
-                                class="@(i == 0 ? "active" : "")"
-                                aria-current="@(i == 0 ? "true" : "false")"
+                        <button type="button" data-bs-target="#carruselClases" data-bs-slide-to="@i"
+                                class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")"
                                 aria-label="Clase @(i + 1)">
                         </button>
                     }
@@ -114,14 +108,9 @@
                                                     <span>@porcentajeOcupacion%</span>
                                                 </div>
 
-                                                <div class="progress"
-                                                     role="progressbar"
-                                                     aria-label="Porcentaje de ocupación"
-                                                     aria-valuenow="@porcentajeOcupacion"
-                                                     aria-valuemin="0"
-                                                     aria-valuemax="100">
-                                                    <div class="progress-bar"
-                                                         style="width: @porcentajeOcupacion%">
+                                                <div class="progress" role="progressbar" aria-label="Porcentaje de ocupación"
+                                                     aria-valuenow="@porcentajeOcupacion" aria-valuemin="0" aria-valuemax="100">
+                                                    <div class="progress-bar" style="width: @porcentajeOcupacion%">
                                                     </div>
                                                 </div>
 
@@ -139,22 +128,14 @@
 
                 @if (Model.Count > 1)
                 {
-                    <button class="carousel-control-prev"
-                            type="button"
-                            data-bs-target="#carruselClases"
-                            data-bs-slide="prev"
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carruselClases" data-bs-slide="prev"
                             aria-label="Clase anterior">
-                        <span class="carousel-control-prev-icon bg-dark rounded-circle p-3"
-                              aria-hidden="true"></span>
+                        <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
                     </button>
 
-                    <button class="carousel-control-next"
-                            type="button"
-                            data-bs-target="#carruselClases"
-                            data-bs-slide="next"
+                    <button class="carousel-control-next" type="button" data-bs-target="#carruselClases" data-bs-slide="next"
                             aria-label="Clase siguiente">
-                        <span class="carousel-control-next-icon bg-dark rounded-circle p-3"
-                              aria-hidden="true"></span>
+                        <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
                     </button>
                 }
             </div>
@@ -169,55 +150,63 @@
             <div class="row g-3">
                 @if (esAdministrador)
                 {
-                <div class="col-sm-6 col-lg-3">
-                    <a asp-controller="Usuario" asp-action="Index"
-                       class="card h-100 shadow-sm text-decoration-none">
-                        <div class="card-body">
-                            <h3 class="h5">Usuarios</h3>
-                            <p class="text-muted mb-0">
-                                Gestionar las cuentas del sistema.
-                            </p>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <a asp-controller="Plan" asp-action="Index"
-                       class="card h-100 shadow-sm text-decoration-none">
-                        <div class="card-body">
-                            <h3 class="h5">Planes</h3>
-                            <p class="text-muted mb-0">
-                                Consultar los planes del gimnasio.
-                            </p>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <a asp-controller="Clase" asp-action="Index"
-                       class="card h-100 shadow-sm text-decoration-none">
-                        <div class="card-body">
-                            <h3 class="h5">Clases</h3>
-                            <p class="text-muted mb-0">
-                                Consultar las actividades disponibles.
-                            </p>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <a asp-controller="Horario" asp-action="Index"
-                       class="card h-100 shadow-sm text-decoration-none">
-                        <div class="card-body">
-                            <h3 class="h5">Horarios</h3>
-                            <p class="text-muted mb-0">
-                                Gestionar los días y horas de cada clase.
-                            </p>
-                        </div>
-                    </a>
-                </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a asp-controller="Usuario" asp-action="Index" class="card h-100 shadow-sm text-decoration-none">
+                            <div class="card-body">
+                                <h3 class="h5">Usuarios</h3>
+                                <p class="text-muted mb-0">
+                                    Gestionar las cuentas del sistema.
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a asp-controller="Plan" asp-action="Index" class="card h-100 shadow-sm text-decoration-none">
+                            <div class="card-body">
+                                <h3 class="h5">Planes</h3>
+                                <p class="text-muted mb-0">
+                                    Consultar los planes del gimnasio.
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a asp-controller="Clase" asp-action="Index" class="card h-100 shadow-sm text-decoration-none">
+                            <div class="card-body">
+                                <h3 class="h5">Clases</h3>
+                                <p class="text-muted mb-0">
+                                    Consultar las actividades disponibles.
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a asp-controller="Horario" asp-action="Index" class="card h-100 shadow-sm text-decoration-none">
+                            <div class="card-body">
+                                <h3 class="h5">Horarios</h3>
+                                <p class="text-muted mb-0">
+                                    Gestionar los días y horas de cada clase.
+                                </p>
+                            </div>
+                        </a>
+                    </div>
                 }
+     
+                <div class="col-md-4 mb-3">
+                    <a asp-controller="Turno" asp-action="Index" class="text-decoration-none text-reset d-block h-100">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Gestión de reservas</h5>
+                                <p class="card-text">
+                                    Consultá las reservas y administrá sus estados.
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
 
                 <div class="col-sm-6 col-lg-3">
-                    <a asp-controller="Membresia" asp-action="Index"
-                       class="card h-100 shadow-sm text-decoration-none">
+                    <a asp-controller="Membresia" asp-action="Index" class="card h-100 shadow-sm text-decoration-none">
                         <div class="card-body">
                             <h3 class="h5">Membresías</h3>
                             <p class="text-muted mb-0">
@@ -228,8 +217,7 @@
                 </div>
 
                 <div class="col-sm-6 col-lg-3">
-                    <a asp-controller="Pago" asp-action="Index"
-                       class="card h-100 shadow-sm text-decoration-none">
+                    <a asp-controller="Pago" asp-action="Index" class="card h-100 shadow-sm text-decoration-none">
                         <div class="card-body">
                             <h3 class="h5">Pagos</h3>
                             <p class="text-muted mb-0">
@@ -240,8 +228,7 @@
                 </div>
 
                 <div class="col-sm-6 col-lg-3">
-                    <a asp-controller="Ingreso" asp-action="Index"
-                       class="card h-100 shadow-sm text-decoration-none">
+                    <a asp-controller="Ingreso" asp-action="Index" class="card h-100 shadow-sm text-decoration-none">
                         <div class="card-body">
                             <h3 class="h5">Para clientes</h3>
                             <p class="text-muted mb-0">

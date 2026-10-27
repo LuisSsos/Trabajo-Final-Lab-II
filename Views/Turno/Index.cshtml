@@ -1,0 +1,111 @@
+@model IEnumerable<Gimnasio.Models.Turno>
+
+@{
+    ViewData["Title"] = "Gestión de reservas";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Gestión de reservas</h1>
+            <p class="text-muted mb-0">
+                Consultá las reservas y administrá sus estados.
+            </p>
+        </div>
+
+        <a asp-action="Crear" class="btn btn-primary">
+            Nueva reserva
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h2 class="h5 mb-0">Listado de reservas</h2>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Horario</th>
+                            <th>Clase</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            @foreach (var turno in Model)
+                            {
+                                <tr>
+                                    <td>@turno.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @turno.Horario.HoraInicio.ToString(@"hh\:mm")
+                                        -
+                                        @turno.Horario.HoraFin.ToString(@"hh\:mm")
+                                    </td>
+                                    <td>@turno.Horario.Clase.Nombre</td>
+                                    <td>
+                                        @turno.Cliente.Usuario.Nombre
+                                        @turno.Cliente.Usuario.Apellido
+                                    </td>
+                                    <td>
+                                        @switch (turno.Estado)
+                                        {
+                                            case Gimnasio.Models.EstadoTurno.Reservado:
+                                                <span class="badge bg-primary">Reservado</span>
+                                                break;
+
+                                            case Gimnasio.Models.EstadoTurno.Asistio:
+                                                <span class="badge bg-success">Asistió</span>
+                                                break;
+
+                                            case Gimnasio.Models.EstadoTurno.Cancelado:
+                                                <span class="badge bg-secondary">Cancelado</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (turno.Estado == Gimnasio.Models.EstadoTurno.Reservado)
+                                        {
+                                            <form asp-action="DarDeBaja" method="post" class="d-inline"
+                                                  onsubmit="return confirm('¿Querés cancelar esta reserva?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="turnoId" value="@turno.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Dar de baja
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin acciones</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    Todavía no hay reservas registradas.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+            Volver al inicio
+        </a>
+    </div>
+</div>

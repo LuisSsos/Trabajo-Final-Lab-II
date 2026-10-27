@@ -1,0 +1,461 @@
+@{
+    ViewData["Title"] = "Registrar turno";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="h3">Registrar turno</h1>
+        <p class="text-muted">
+            Inscribí un cliente en una clase y horario disponibles.
+        </p>
+    </div>
+
+    <div id="mensaje" class="alert d-none" role="alert"></div>
+
+    <div id="appTurno">
+        <form id="formTurno" @@submit.prevent="crearTurno">
+            @Html.AntiForgeryToken()
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label for="busquedaCliente" class="form-label">
+                            Buscar cliente
+                        </label>
+
+                        <input id="busquedaCliente" type="text" class="form-control" v-model="busqueda"
+                        @@input="buscarClientes" placeholder="Nombre, apellido, DNI o correo" autocomplete="off" />
+
+                        <div class="list-group mt-2" v-if="clientes.length > 0">
+                            <button type="button" class="list-group-item list-group-item-action"
+                                    v-for="cliente in clientes" :key="cliente.id" @@click="seleccionarCliente(cliente)">
+                                <strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong>
+                                <br />
+                                <small class="text-muted">
+                                    DNI: {{ cliente.dni || 'Sin DNI' }}
+                                    · {{ cliente.email || 'Sin correo' }}
+                                </small>
+                            </button>
+                        </div>
+
+                        <div v-if="clienteSeleccionado" class="alert alert-info mt-3 mb-0">
+                            Cliente seleccionado:
+                            <strong>
+                                {{ clienteSeleccionado.nombre }}
+                                {{ clienteSeleccionado.apellido }}
+                            </strong>
+
+                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @@click="quitarCliente">
+                                Cambiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="HorarioId" class="form-label">
+                            Clase y horario
+                        </label>
+
+                        <select id="HorarioId" class="form-select" v-model="horarioId" required>
+                            <option value="">Seleccioná un horario</option>
+
+                            <option v-for="horario in horarios" :key="horario.id" :value="String(horario.id)">
+                                {{ horario.clase }} —
+                                {{ traducirDia(horario.diaSemana) }} —
+                                {{ horario.horaInicio }} a {{ horario.horaFin }} —
+                                Cupo: {{ horario.cupoMaximo }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-primary" @@click="consultarFechas" :disabled="consultando ||
+                            !clienteSeleccionado ||
+                            !horarioId">
+                            {{ consultando ? 'Consultando fechas...' : 'Consultar fechas disponibles' }}
+                        </button>
+                    </div>
+
+                    <div v-if="fechasConsultadas" class="mt-4">
+                        <h2 class="h5">Vista previa de inscripción</h2>
+
+                        <p class="text-muted">
+                            Clase: <strong>{{ vistaPrevia.clase }}</strong><br />
+                            Horario: {{ traducirDia(vistaPrevia.diaSemana) }},
+                            {{ vistaPrevia.horaInicio }} a {{ vistaPrevia.horaFin }}<br />
+                            Período de membresía:
+                            {{ vistaPrevia.fechaInicio }} al {{ vistaPrevia.fechaFin }}
+                        </p>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Inscriptos</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr v-for="item in vistaPrevia.fechas" :key="item.fecha">
+                                        <td>{{ item.fecha }}</td>
+                                        <td>{{ item.inscriptos }} / {{ item.cupoMaximo }}</td>
+                                        <td>
+                                            <span v-if="item.yaReservado" class="badge text-bg-primary">
+                                                Ya inscripto
+                                            </span>
+
+                                            <span v-else-if="item.cupoCompleto" class="badge text-bg-danger">
+                                                Cupo completo
+                                            </span>
+
+                                            <span v-else class="badge text-bg-success">
+                                                Disponible
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    <tr v-if="vistaPrevia.fechas.length === 0">
+                                        <td colspan="3" class="text-center text-muted">
+                                            No hay fechas de este horario dentro del período consultado.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary" @@click="confirmarInscripcion"
+                        :disabled="guardando || !fechasConsultadas || !clienteSeleccionado || vistaPrevia.fechas.length === 0">
+                    {{ guardando ? 'Registrando reservas...' : 'Confirmar inscripción' }}
+                </button>
+
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/vue/vue.global.prod.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    busqueda: '',
+                    clientes: [],
+                    clienteSeleccionado: null,
+                    horarios: [],
+                    horarioId: '',
+                    fecha: '',
+                    guardando: false,
+                    fechaMinima: new Date().toLocaleDateString('en-CA'),
+
+                    consultando: false,
+                    fechasConsultadas: false,
+                    vistaPrevia: {
+                        clase: '',
+                        diaSemana: '',
+                        horaInicio: '',
+                        horaFin: '',
+                        fechaInicio: '',
+                        fechaFin: '',
+                        fechas: []
+                    }
+                };
+            },
+
+            async mounted() {
+                await this.cargarHorarios();
+            },
+
+            methods: {
+                async buscarClientes() {
+                    this.clienteSeleccionado = null;
+
+                    if (this.busqueda.trim().length < 2) {
+                        this.clientes = [];
+                        return;
+                    }
+
+                    try {
+                        const respuesta = await fetch(
+                            '@Url.Action("BuscarClientes", "Turno")?busqueda=' +
+                            encodeURIComponent(this.busqueda)
+                        );
+
+                        const datos = await respuesta.json();
+                        this.clientes = datos.datos || [];
+                    } catch {
+                        this.mostrarMensaje(
+                            'No se pudo realizar la búsqueda de clientes.',
+                            false
+                        );
+                    }
+                },
+
+                seleccionarCliente(cliente) {
+                    this.clienteSeleccionado = cliente;
+                    this.busqueda =
+                        cliente.nombre + ' ' + cliente.apellido;
+                    this.clientes = [];
+                },
+
+                quitarCliente() {
+                    this.clienteSeleccionado = null;
+                    this.busqueda = '';
+                    this.clientes = [];
+                },
+
+                async cargarHorarios() {
+                    try {
+                        const respuesta = await fetch(
+                            '@Url.Action("ListarHorarios", "Turno")'
+                        );
+
+                        const datos = await respuesta.json();
+                        this.horarios = datos.datos || [];
+                    } catch {
+                        this.mostrarMensaje(
+                            'No se pudieron cargar los horarios.',
+                            false
+                        );
+                    }
+                },
+
+                traducirDia(dia) {
+                    const dias = {
+                        Sunday: 'Domingo',
+                        Monday: 'Lunes',
+                        Tuesday: 'Martes',
+                        Wednesday: 'Miércoles',
+                        Thursday: 'Jueves',
+                        Friday: 'Viernes',
+                        Saturday: 'Sábado'
+                    };
+
+                    return dias[dia] || dia;
+                },
+
+                async crearTurno(evento) {
+                    evento.preventDefault();
+
+                    if (!this.clienteSeleccionado) {
+                        this.mostrarMensaje(
+                            'Seleccioná un cliente de los resultados.',
+                            false
+                        );
+                        return;
+                    }
+
+                    if (!this.horarioId || !this.fecha) {
+                        this.mostrarMensaje(
+                            'Seleccioná un horario y una fecha.',
+                            false
+                        );
+                        return;
+                    }
+
+                    this.guardando = true;
+
+                    try {
+                        const formulario = new FormData();
+                        formulario.append(
+                            'ClienteId',
+                            this.clienteSeleccionado.id
+                        );
+                        formulario.append('HorarioId', this.horarioId);
+                        formulario.append('Fecha', this.fecha);
+                        formulario.append(
+                            '__RequestVerificationToken',
+                            document.querySelector(
+                                'input[name="__RequestVerificationToken"]'
+                            ).value
+                        );
+
+                        const respuesta = await fetch(
+                            '@Url.Action("Crear", "Turno")',
+                            {
+                                method: 'POST',
+                                body: formulario
+                            }
+                        );
+
+                        const datos = await respuesta.json();
+
+                        this.mostrarMensaje(
+                            datos.mensaje ||
+                            'No se pudo registrar el turno.',
+                            respuesta.ok && datos.success
+                        );
+
+                        if (respuesta.ok && datos.success) {
+                            this.clienteSeleccionado = null;
+                            this.busqueda = '';
+                            this.clientes = [];
+                            this.horarioId = '';
+                            this.fecha = '';
+                        }
+                    } catch {
+                        this.mostrarMensaje(
+                            'Ocurrió un error al comunicarse con el servidor.',
+                            false
+                        );
+                    } finally {
+                        this.guardando = false;
+                    }
+                },
+
+                mostrarMensaje(texto, correcto) {
+                    const elemento = document.getElementById('mensaje');
+
+                    elemento.textContent = texto;
+                    elemento.className = correcto
+                        ? 'alert alert-success'
+                        : 'alert alert-danger';
+
+                    elemento.style.whiteSpace = 'pre-line';
+                },
+
+                async consultarFechas() {
+                    if (!this.clienteSeleccionado || !this.horarioId) {
+                        this.mostrarMensaje(
+                            'Seleccioná un cliente y un horario.',
+                            false
+                        );
+                        return;
+                    }
+
+                    this.consultando = true;
+                    this.fechasConsultadas = false;
+
+                    try {
+                        const parametros = new URLSearchParams({
+                            clienteId: this.clienteSeleccionado.id,
+                            horarioId: this.horarioId
+                        });
+
+                        const respuesta = await fetch(
+                            '@Url.Action("VistaPreviaInscripcion", "Turno")?' +
+                            parametros.toString()
+                        );
+
+                        const datos = await respuesta.json();
+
+                        if (!respuesta.ok || !datos.success) {
+                            this.mostrarMensaje(
+                                datos.mensaje || 'No se pudo consultar la disponibilidad.',
+                                false
+                            );
+                            return;
+                        }
+
+                        this.vistaPrevia = datos;
+                        this.fechasConsultadas = true;
+
+                        this.mostrarMensaje(
+                            'Vista previa cargada correctamente.',
+                            true
+                        );
+                    } catch {
+                        this.mostrarMensaje(
+                            'Ocurrió un error al consultar las fechas.',
+                            false
+                        );
+                    } finally {
+                        this.consultando = false;
+                    }
+                },
+                async confirmarInscripcion() {
+                    if (!this.clienteSeleccionado || !this.horarioId || !this.fechasConsultadas) {
+                        this.mostrarMensaje(
+                            'Seleccioná un cliente y un horario, y consultá las fechas antes de confirmar.',
+                            false
+                        );
+                        return;
+                    }
+
+                    const disponibles = this.vistaPrevia.fechas.filter(
+                        fecha => fecha.disponible
+                    ).length;
+
+                    if (disponibles === 0) {
+                        this.mostrarMensaje(
+                            'No hay fechas disponibles para inscribir al cliente.',
+                            false
+                        );
+                        return;
+                    }
+
+                    if (!confirm(
+                        `Se intentará inscribir al cliente en ${disponibles} fecha(s) disponible(s). ¿Querés continuar?`
+                    )) {
+                        return;
+                    }
+
+                    this.guardando = true;
+
+                    try {
+                        const formulario = new FormData();
+
+                        formulario.append(
+                            'clienteId',
+                            this.clienteSeleccionado.id
+                        );
+
+                        formulario.append('horarioId', this.horarioId);
+
+                        formulario.append(
+                            '__RequestVerificationToken',
+                            document.querySelector(
+                                'input[name="__RequestVerificationToken"]'
+                            ).value
+                        );
+
+                        const respuesta = await fetch(
+                            '@Url.Action("ConfirmarInscripcion", "Turno")',
+                            {
+                                method: 'POST',
+                                body: formulario
+                            }
+                        );
+
+                        const datos = await respuesta.json();
+
+                        if (!respuesta.ok || !datos.success) {
+                            this.mostrarMensaje(
+                                datos.mensaje || 'No se pudo completar la inscripción.',
+                                false
+                            );
+                            return;
+                        }
+
+                        let mensaje = datos.mensaje;
+
+                        if (datos.fechasOmitidas?.length) {
+                            mensaje += '\n' + datos.fechasOmitidas.join('\n');
+                        }
+
+                        this.mostrarMensaje(mensaje, true);
+
+                        // Actualiza los cupos después de la inscripción.
+                        await this.consultarFechas();
+                    } catch {
+                        this.mostrarMensaje(
+                            'Ocurrió un error al comunicarse con el servidor.',
+                            false
+                        );
+                    } finally {
+                        this.guardando = false;
+                    }
+                },
+            }
+        }).mount('#appTurno');
+    </script>
+}
