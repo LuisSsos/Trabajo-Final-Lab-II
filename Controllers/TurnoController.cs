@@ -20,9 +20,21 @@ public class TurnoController : Controller
     }
 
 
+
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int pagina = 1)
     {
+        const int tamanoPagina = 10;
+
+        var totalTurnos = await _contexto.Turnos.CountAsync();
+
+        var totalPaginas = (int)Math.Ceiling(
+            totalTurnos / (double)tamanoPagina);
+
+        totalPaginas = Math.Max(1, totalPaginas);
+
+        pagina = Math.Clamp(pagina, 1, totalPaginas);
+
         var turnos = await _contexto.Turnos
             .AsNoTracking()
             .Include(t => t.Cliente)
@@ -31,10 +43,18 @@ public class TurnoController : Controller
                 .ThenInclude(h => h.Clase)
             .OrderByDescending(t => t.Fecha)
             .ThenBy(t => t.Horario.HoraInicio)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
             .ToListAsync();
+
+        ViewBag.PaginaActual = pagina;
+        ViewBag.TotalPaginas = totalPaginas;
+        ViewBag.TotalTurnos = totalTurnos;
+        ViewBag.TamanoPagina = tamanoPagina;
 
         return View(turnos);
     }
+
 
     [HttpGet]
     public async Task<IActionResult> BuscarClientes(string? busqueda)
