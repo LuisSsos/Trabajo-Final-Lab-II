@@ -271,7 +271,7 @@ public class TurnoController : Controller
                 _contexto.Database.CurrentTransaction!.GetDbTransaction();
 
             comando.CommandText =
-                "SELECT Id FROM horarios WHERE Id = @id FOR UPDATE";
+                "SELECT Id FROM Horarios WHERE Id = @id FOR UPDATE";
 
             var parametro = comando.CreateParameter();
             parametro.ParameterName = "@id";
@@ -407,7 +407,7 @@ public class TurnoController : Controller
                 _contexto.Database.CurrentTransaction!.GetDbTransaction();
 
             comando.CommandText =
-                "SELECT Id FROM horarios WHERE Id = @id FOR UPDATE";
+                "SELECT Id FROM Horarios WHERE Id = @id FOR UPDATE";
 
             var parametro = comando.CreateParameter();
             parametro.ParameterName = "@id";

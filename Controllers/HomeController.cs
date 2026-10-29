@@ -36,6 +36,26 @@ public class HomeController : Controller
             .ThenBy(clase => clase.Nombre)
             .Take(5)
             .ToListAsync();
+        // Reservas de cada fecha, para saber cual es el dia mas ocupado
+        var reservas = await _contexto.Turnos
+            .Where(turno => turno.Estado == EstadoTurno.Reservado)
+            .Select(turno => new
+            {
+                turno.Horario.ClaseId,
+                turno.HorarioId,
+                turno.Fecha
+            })
+            .ToListAsync();
+
+        foreach (var clase in clasesDestacadas)
+        {
+            clase.MaximoPorFecha = reservas
+                .Where(r => r.ClaseId == clase.Id)
+                .GroupBy(r => new { r.HorarioId, r.Fecha })
+                .Select(grupo => grupo.Count())
+                .DefaultIfEmpty(0)
+                .Max();
+        }
 
         return View(clasesDestacadas);
     }

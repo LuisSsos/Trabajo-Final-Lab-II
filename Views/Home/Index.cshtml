@@ -54,10 +54,10 @@
                     @for (int i = 0; i < Model.Count; i++)
                     {
                         var clase = Model[i];
-                        var porcentajeOcupacion = clase.CupoMaximo >= 0
-                            ? Math.Min(100, (int)Math.Round(
-                                clase.CantidadReservas * 100.0 / clase.CupoMaximo))
-                            : 0;
+                        var porcentajeOcupacion = clase.CupoMaximo > 0
+                        ? Math.Min(100, (int)Math.Round(
+                            clase.MaximoPorFecha * 100.0 / clase.CupoMaximo))
+                        : 0;
 
                         <div class="carousel-item @(i == 0 ? "active" : "")">
                             <div class="card shadow-sm border-0">
@@ -115,7 +115,7 @@
                                                 </div>
 
                                                 <p class="small text-muted mt-3 mb-0">
-                                                    Porcentaje calculado sobre el cupo máximo.
+                                                    Porcentaje de la fecha más llena sobre el cupo maximo..
                                                 </p>
                                             </div>
                                         </div>

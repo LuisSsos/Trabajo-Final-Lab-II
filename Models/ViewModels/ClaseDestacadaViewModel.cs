@@ -11,4 +11,6 @@ public class ClaseDestacadaViewModel
     public int CupoMaximo { get; set; }
 
     public int CantidadReservas { get; set; }
+
+    public int MaximoPorFecha { get; set; }
 }
