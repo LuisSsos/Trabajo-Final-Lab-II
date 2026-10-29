@@ -330,18 +330,21 @@ public class TurnoController : Controller
                     mensaje = "El cliente seleccionado no existe."
                 });
 
-            var duplicado = await _contexto.Turnos.AnyAsync(t =>
-                t.ClienteId == cliente.Id &&
-                t.HorarioId == horario.Id &&
-                t.Fecha == fecha &&
-                t.Estado != EstadoTurno.Cancelado);
+            var turnoExistente = await _contexto.Turnos
+                .FirstOrDefaultAsync(t =>
+                    t.ClienteId == cliente.Id &&
+                    t.HorarioId == horario.Id &&
+                    t.Fecha == fecha);
 
-            if (duplicado)
+            if (turnoExistente != null &&
+                turnoExistente.Estado != EstadoTurno.Cancelado)
+            {
                 return BadRequest(new
                 {
                     success = false,
                     mensaje = "El cliente ya tiene una reserva para ese horario y fecha."
                 });
+            }
 
             var inscriptos = await _contexto.Turnos.CountAsync(t =>
                 t.HorarioId == horario.Id &&
@@ -355,15 +358,23 @@ public class TurnoController : Controller
                     mensaje = "El cupo de esta clase está completo para esa fecha."
                 });
 
-            var turno = new Turno
-            {
-                ClienteId = cliente.Id,
-                HorarioId = horario.Id,
-                Fecha = fecha,
-                Estado = EstadoTurno.Reservado
-            };
 
-            _contexto.Turnos.Add(turno);
+            if (turnoExistente != null)
+            {
+                turnoExistente.Estado = EstadoTurno.Reservado;
+            }
+            else
+            {
+                var turno = new Turno
+                {
+                    ClienteId = cliente.Id,
+                    HorarioId = horario.Id,
+                    Fecha = fecha,
+                    Estado = EstadoTurno.Reservado
+                };
+
+                _contexto.Turnos.Add(turno);
+            }
 
             await _contexto.SaveChangesAsync();
             await transaccion.CommitAsync();

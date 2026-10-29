@@ -94,13 +94,18 @@
                                         <th>Fecha</th>
                                         <th>Inscriptos</th>
                                         <th>Estado</th>
+                                        <th>Acción</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
                                     <tr v-for="item in vistaPrevia.fechas" :key="item.fecha">
                                         <td>{{ item.fecha }}</td>
-                                        <td>{{ item.inscriptos }} / {{ item.cupoMaximo }}</td>
+
+                                        <td>
+                                            {{ item.inscriptos }} / {{ item.cupoMaximo }}
+                                        </td>
+
                                         <td>
                                             <span v-if="item.yaReservado" class="badge text-bg-primary">
                                                 Ya inscripto
@@ -110,9 +115,27 @@
                                                 Cupo completo
                                             </span>
 
-                                            <span v-else class="badge text-bg-success">
+                                            <span v-else-if="item.disponible" class="badge text-bg-success">
                                                 Disponible
                                             </span>
+
+                                            <span v-else class="badge text-bg-secondary">
+                                                No disponible
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-primary"
+                                                    :disabled="guardando || !item.disponible"
+                                                @@click="crearTurnoIndividual(item)">
+                                                {{ guardando ? 'Registrando...' : 'Reservar' }}
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    <tr v-if="vistaPrevia.fechas.length === 0">
+                                        <td colspan="4" class="text-center text-muted">
+                                            No hay fechas de este horario dentro del período consultado.
                                         </td>
                                     </tr>
 
@@ -445,6 +468,79 @@
                         this.mostrarMensaje(mensaje, true);
 
                         // Actualiza los cupos después de la inscripción.
+                        await this.consultarFechas();
+                    } catch {
+                        this.mostrarMensaje(
+                            'Ocurrió un error al comunicarse con el servidor.',
+                            false
+                        );
+                    } finally {
+                        this.guardando = false;
+                    }
+                },
+
+                async crearTurnoIndividual(item) {
+                    if (!this.clienteSeleccionado || !this.horarioId) {
+                        this.mostrarMensaje(
+                            'Seleccioná un cliente y un horario.',
+                            false
+                        );
+                        return;
+                    }
+
+                    if (!item.disponible) {
+                        this.mostrarMensaje(
+                            'La fecha seleccionada ya no está disponible.',
+                            false
+                        );
+                        return;
+                    }
+
+                    if (!confirm(`¿Querés reservar el día ${item.fecha}?`)) {
+                        return;
+                    }
+
+                    this.guardando = true;
+
+                    try {
+                        const formulario = new FormData();
+
+                        formulario.append(
+                            'ClienteId',
+                            this.clienteSeleccionado.id
+                        );
+                        formulario.append('HorarioId', this.horarioId);
+                        formulario.append('Fecha', item.fecha);
+                        formulario.append(
+                            '__RequestVerificationToken',
+                            document.querySelector(
+                                'input[name="__RequestVerificationToken"]'
+                            ).value
+                        );
+
+                        const respuesta = await fetch(
+                            '@Url.Action("Crear", "Turno")',
+                            {
+                                method: 'POST',
+                                body: formulario
+                            }
+                        );
+
+                        const datos = await respuesta.json();
+
+                        if (!respuesta.ok || !datos.success) {
+                            this.mostrarMensaje(
+                                datos.mensaje || 'No se pudo registrar la reserva.',
+                                false
+                            );
+                            return;
+                        }
+
+                        this.mostrarMensaje(
+                            datos.mensaje || 'La reserva se registró correctamente.',
+                            true
+                        );
+
                         await this.consultarFechas();
                     } catch {
                         this.mostrarMensaje(
