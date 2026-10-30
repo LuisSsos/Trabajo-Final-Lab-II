@@ -3,6 +3,9 @@ using Gimnasio.Models;
 using Gimnasio.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,20 @@ builder.Services.ConfigureApplicationCookie(opciones =>
     opciones.LoginPath = "/Cuenta/Login";
     opciones.AccessDeniedPath = "/Cuenta/AccesoDenegado";
 });
+
+builder.Services.AddAuthentication()
+    .AddJwtBearer(opciones =>
+    {
+        opciones.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtClave"]!))
+        };
+    });
 
 var app = builder.Build();
 

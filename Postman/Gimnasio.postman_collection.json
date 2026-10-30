@@ -1,0 +1,139 @@
+{
+  "info": {
+    "_postman_id": "943cb6f8-a72c-48f0-94c2-0d13a2ebd4f6",
+    "name": "Gimnasio",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "59324316",
+    "_collection_link": "https://go.postman.co/collection/59324316-943cb6f8-a72c-48f0-94c2-0d13a2ebd4f6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"token\", pm.response.json().token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@gimnasio.com\",\n  \"password\": \"Admin123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5213/api/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5213",
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Ver planes (con token)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5213/api/planes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5213",
+          "path": [
+            "api",
+            "planes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Ver planes (sin token)",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5213/api/planes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5213",
+          "path": [
+            "api",
+            "planes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear plan",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Plan Semestral\",\n  \"precio\": 45000,\n  \"duracionDias\": 180\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5213/api/planes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5213",
+          "path": [
+            "api",
+            "planes"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
