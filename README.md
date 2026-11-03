@@ -208,3 +208,80 @@ Para probarla, con la aplicación corriendo, importar en Postman el archivo `Pos
 - ABMC de planes, clases, horarios, membresías y pagos.
 - Turnos: inscripción de un cliente a una clase en todas las fechas de su membresía, controlando el cupo. Está en `Controllers/TurnoController.cs`.
 - Ingreso de clientes por DNI con cartel de color (verde, amarillo o rojo) y foto de perfil.
+
+## Tabla de evidencias
+
+1. 4 Tablas y Relación 1:N ✅ Cumplido
+	
+![Diagrama de entidad-relación del sistema Gimnasio](BaseDatos/DER.jpeg)
+	
+
+2. Login ✅ Cumplido
+Login con validación jwt.
+https://github.com/LuisSsos/Trabajo-Final-Lab-II/blob/00cfa0fbd1152d86fa025ca5b78b6381eba10bcd/Controllers/ApiLoginController.cs#L11
+![Vista de loguin](BaseDatos/Login.JPG)
+
+   Roles ✅ Cumplido
+Asignación de roles al crear usuarios
+https://github.com/LuisSsos/Trabajo-Final-Lab-II/blob/00cfa0fbd1152d86fa025ca5b78b6381eba10bcd/Controllers/UsuarioController.cs#L106
+![Vista de creación de usuario - selección de rol](BaseDatos/Rol.JPG)
+
+   Avatar ✅ Cumplido
+Validación y guardado de avatar
+https://github.com/LuisSsos/Trabajo-Final-Lab-II/blob/00cfa0fbd1152d86fa025ca5b78b6381eba10bcd/Controllers/UsuarioController.cs#L138
+![Vista de avatar cargado de usuario](BaseDatos/Avatar.JPG)
+
+3. Manejo de Archivos (Extra)
+	
+
+✅ Cumplido
+	
+
+[ProductosController.cs#L45](URL)
+	
+
+Video corto / GIF mostrando subida de comprobante
+
+4. ABM en Vue.js + AJAX
+	
+
+✅ Cumplido
+	
+
+[VueComponent.js](URL)
+	
+
+Video corto / GIF del ABM dinámico
+
+5. Paginado por Servidor
+	
+
+✅ Cumplido
+	
+
+[Paginador.cs](URL)
+	
+
+Captura del inspector de red enviando page=2
+
+6. Selección Asíncrona (AJAX)
+	
+
+✅ Cumplido
+	
+
+[BuscarClientes.cshtml](URL)
+	
+
+GIF buscando entidades en desplegable
+
+7. Web API + JWT
+	
+
+✅ Cumplido
+	
+
+[ApiController.cs](URL)
+	
+
+Captura de Postman con Bearer Token
