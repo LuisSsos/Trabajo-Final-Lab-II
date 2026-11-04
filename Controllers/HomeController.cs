@@ -21,43 +21,55 @@ public class HomeController : Controller
     [Authorize]
     public async Task<IActionResult> Index()
     {
-        var clasesDestacadas = await _contexto.Clases
-            .Select(clase => new ClaseDestacadaViewModel
+        var inicioSemanaActual = DateTime.Today.AddDays(
+            -(((int)DateTime.Today.DayOfWeek + 6) % 7));
+
+        var inicioPeriodo = inicioSemanaActual;
+        var finPeriodo = inicioSemanaActual.AddDays(21);
+
+        // Obtenemos la cantidad de inscriptos de cada horario durante ese período.
+        var horariosDatos = await _contexto.Horarios
+            .Select(horario => new
             {
-                Id = clase.Id,
-                Nombre = clase.Nombre,
-                Descripcion = clase.Descripcion,
-                CupoMaximo = clase.CupoMaximo,
-                CantidadReservas = clase.Horarios
-                    .SelectMany(horario => horario.Turnos)
-                    .Count(turno => turno.Estado == EstadoTurno.Reservado)
+                horario.Id,
+                NombreClase = horario.Clase.Nombre,
+                NombreEntrenador =
+                    horario.Clase.Empleado.Usuario.Nombre + " " +
+                    horario.Clase.Empleado.Usuario.Apellido,
+                horario.DiaSemana,
+                horario.HoraInicio,
+                horario.HoraFin,
+                CupoMaximo = horario.Clase.CupoMaximo,
+
+                TotalInscriptos = horario.Turnos.Count(turno =>
+                    (turno.Estado == EstadoTurno.Reservado ||
+                     turno.Estado == EstadoTurno.Asistio) &&
+                    turno.Fecha >= inicioPeriodo &&
+                    turno.Fecha < finPeriodo)
             })
-            .OrderByDescending(clase => clase.CantidadReservas)
-            .ThenBy(clase => clase.Nombre)
+            .ToListAsync();
+
+        // Calculamos el promedio semanal y ordenamos los horarios.
+        var horariosDestacados = horariosDatos
+            .Select(horario => new HorarioDestacadoViewModel
+            {
+                HorarioId = horario.Id,
+                NombreClase = horario.NombreClase,
+                NombreEntrenador = horario.NombreEntrenador,
+                DiaSemana = horario.DiaSemana,
+                HoraInicio = horario.HoraInicio,
+                HoraFin = horario.HoraFin,
+                CupoMaximo = horario.CupoMaximo,
+                PromedioInscriptos = horario.TotalInscriptos / 3m
+            })
+            .OrderByDescending(horario => horario.PromedioInscriptos)
+            .ThenBy(horario => horario.NombreClase)
+            .ThenBy(horario => horario.DiaSemana)
+            .ThenBy(horario => horario.HoraInicio)
             .Take(5)
-            .ToListAsync();
-        // Reservas de cada fecha, para saber cual es el dia mas ocupado
-        var reservas = await _contexto.Turnos
-            .Where(turno => turno.Estado == EstadoTurno.Reservado)
-            .Select(turno => new
-            {
-                turno.Horario.ClaseId,
-                turno.HorarioId,
-                turno.Fecha
-            })
-            .ToListAsync();
+            .ToList();
 
-        foreach (var clase in clasesDestacadas)
-        {
-            clase.MaximoPorFecha = reservas
-                .Where(r => r.ClaseId == clase.Id)
-                .GroupBy(r => new { r.HorarioId, r.Fecha })
-                .Select(grupo => grupo.Count())
-                .DefaultIfEmpty(0)
-                .Max();
-        }
-
-        return View(clasesDestacadas);
+        return View(horariosDestacados);
     }
 
     public IActionResult Privacy()
