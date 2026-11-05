@@ -126,17 +126,23 @@
                                 <td class="pe-3">
                                     <div class="d-flex justify-content-center flex-wrap gap-1">
 
-                                        <a asp-action="Detalles" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary">
+                                        <a asp-action="Detalles" asp-route-id="@usuario.Id"
+                                           class="btn btn-sm btn-outline-primary">
                                             Ver
                                         </a>
 
-                                        <a asp-action="Editar" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary">
+                                        <a asp-action="Editar" asp-route-id="@usuario.Id"
+                                           class="btn btn-sm btn-outline-primary">
                                             Editar
                                         </a>
 
-                                        <a asp-action="Eliminar" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-danger">
-                                            Eliminar
-                                        </a>
+                                        @if (ViewBag.EsAdmin == true)
+                                        {
+                                            <a asp-action="Eliminar" asp-route-id="@usuario.Id"
+                                               class="btn btn-sm btn-outline-danger">
+                                                Eliminar
+                                            </a>
+                                        }
 
                                     </div>
                                 </td>
@@ -181,7 +187,8 @@
                     {
                         <li class="page-item @(i == paginaActual ? "active" : "")">
 
-                            <a class="page-link"asp-action="Index"asp-route-pagina="@i"aria-current="@(i == paginaActual ? "page" : null)">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@i"
+                               aria-current="@(i == paginaActual ? "page" : null)">
                                 @i
                             </a>
 
@@ -196,7 +203,7 @@
                         }
                         else
                         {
-                            <a class="page-link"asp-action="Index"asp-route-pagina="@(paginaActual + 1)">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(paginaActual + 1)">
                                 Siguiente
                             </a>
                         }

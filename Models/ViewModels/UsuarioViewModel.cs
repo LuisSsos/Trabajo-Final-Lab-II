@@ -38,5 +38,9 @@ public class UsuarioViewModel
     public string? Dni { get; set; }
 
     public IFormFile? ArchivoAptoMedico { get; set; }
+    
+    [Display(Name = "Apto médico")]
+    public string? AptoMedico { get; set; }
+
     public bool EsCliente { get; set; }
 }

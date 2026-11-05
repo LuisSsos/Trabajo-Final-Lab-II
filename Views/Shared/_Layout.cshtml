@@ -47,14 +47,18 @@
                             </a>
                         </li>
 
-                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador))
+                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador) ||
+                             User.IsInRole(Gimnasio.Models.Roles.Recepcionista))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Usuario" asp-action="Index">
-                                    Usuarios
+                                    Clientes
                                 </a>
                             </li>
+                        }
 
+                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador))
+                        {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Plan" asp-action="Index">
                                     Planes
@@ -72,16 +76,17 @@
                                     Horarios
                                 </a>
                             </li>
+                        }
+
+                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador) ||
+                             User.IsInRole(Gimnasio.Models.Roles.Recepcionista))
+                        {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Turno" asp-action="Index">
                                     Reservas
                                 </a>
                             </li>
-                        }
 
-                        @if (User.IsInRole(Gimnasio.Models.Roles.Administrador) ||
-                        User.IsInRole(Gimnasio.Models.Roles.Recepcionista))
-                        {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Membresia" asp-action="Index">
                                     Membresías
@@ -135,12 +140,11 @@
         </nav>
     </header>
 
-    <!-- Contenido de la página -->
     <main role="main" class="container py-4 flex-grow-1">
         @RenderBody()
     </main>
 
-  
+
     <footer class="border-top mt-auto py-3">
         <div class="container text-center text-muted small">
             &copy; 2026 - Gimnasio

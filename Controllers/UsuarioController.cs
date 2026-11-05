@@ -9,7 +9,7 @@ using Gimnasio.Data;
 
 namespace Gimnasio.Controllers;
 
-[Authorize(Roles = Roles.Administrador)]
+[Authorize(Roles = $"{Roles.Administrador},{Roles.Recepcionista}")]
 public class UsuarioController : Controller
 {
     private const int TamanoPagina = 10;
@@ -24,6 +24,7 @@ public class UsuarioController : Controller
     private readonly UserManager<Usuario> _userManager;
     private readonly ServicioArchivos _archivos;
     private readonly ContextoDatos _contexto;
+    private bool EsAdmin => User.IsInRole(Roles.Administrador);
 
     public UsuarioController(UserManager<Usuario> userManager, ServicioArchivos archivos, ContextoDatos contexto)
     {
@@ -34,20 +35,30 @@ public class UsuarioController : Controller
 
     public async Task<IActionResult> Index(int pagina = 1)
     {
-        var total = await _userManager.Users.CountAsync();
+        IQueryable<Usuario> consulta;
+
+        if (EsAdmin)
+        {
+            consulta = _userManager.Users.OrderBy(u => u.Id);
+        }
+        else
+        {
+            // La recepcionista solo ve clientes.
+            var idsClientes = (await _userManager.GetUsersInRoleAsync(Roles.Cliente))
+                .Select(u => u.Id);
+
+            consulta = _userManager.Users
+                .Where(u => idsClientes.Contains(u.Id))
+                .OrderBy(u => u.Id);
+        }
+
+        var total = await consulta.CountAsync();
         var totalPaginas = Math.Max(1, (int)Math.Ceiling(total / (double)TamanoPagina));
 
-        if (pagina < 1)
-        {
-            pagina = 1;
-        }
-        else if (pagina > totalPaginas)
-        {
-            pagina = totalPaginas;
-        }
+        if (pagina < 1) pagina = 1;
+        else if (pagina > totalPaginas) pagina = totalPaginas;
 
-        var usuarios = await _userManager.Users
-            .OrderBy(u => u.Id)
+        var usuarios = await consulta
             .Skip((pagina - 1) * TamanoPagina)
             .Take(TamanoPagina)
             .Select(u => new UsuarioViewModel
@@ -63,6 +74,7 @@ public class UsuarioController : Controller
 
         ViewBag.PaginaActual = pagina;
         ViewBag.TotalPaginas = totalPaginas;
+        ViewBag.EsAdmin = EsAdmin;
 
         return View(usuarios);
     }
@@ -87,19 +99,26 @@ public class UsuarioController : Controller
         }
     }
 
-    [HttpGet]
+        [HttpGet]
     public IActionResult Crear()
     {
+        ViewBag.EsAdmin = EsAdmin;
         return View();
     }
-
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Crear(UsuarioViewModel modelo)
     {
+        // La recepcionista solo puede crear clientes.
+        if (!EsAdmin)
+        {
+            modelo.Rol = Roles.Cliente;
+        }
+
         if (string.IsNullOrWhiteSpace(modelo.Password))
         {
+            
             ModelState.AddModelError(nameof(modelo.Password), "Tenes que ingresar una contrasena.");
         }
 
@@ -217,13 +236,19 @@ public class UsuarioController : Controller
 
 
 
-    public async Task<IActionResult> Detalles(int id)
+        public async Task<IActionResult> Detalles(int id)
     {
         var usuario = await _userManager.FindByIdAsync(id.ToString());
 
         if (usuario == null)
         {
             return NotFound();
+        }
+
+        // La recepcionista solo puede ver clientes.
+        if (!EsAdmin && !await _userManager.IsInRoleAsync(usuario, Roles.Cliente))
+        {
+            return Forbid();
         }
 
         var modelo = new UsuarioViewModel
@@ -235,6 +260,21 @@ public class UsuarioController : Controller
             Telefono = usuario.PhoneNumber,
             Avatar = usuario.Avatar
         };
+
+        modelo.EsCliente = await _userManager.IsInRoleAsync(usuario, Roles.Cliente);
+
+        if (modelo.EsCliente)
+        {
+            var cliente = await _contexto.Clientes
+                .FirstOrDefaultAsync(c => c.UsuarioId == usuario.Id);
+
+            if (cliente != null)
+            {
+                modelo.Dni = cliente.Dni;
+                modelo.FechaNacimiento = cliente.FechaNacimiento;
+                modelo.AptoMedico = cliente.AptoMedico;  
+            }
+        }
 
         return View(modelo);
     }
@@ -356,6 +396,8 @@ public class UsuarioController : Controller
                 .FirstOrDefaultAsync(c => c.UsuarioId == usuario.Id)
             : null;
 
+        modelo.AptoMedico = cliente?.AptoMedico;
+
         if (modelo.EsCliente && cliente == null)
         {
             ModelState.AddModelError(
@@ -452,6 +494,7 @@ public class UsuarioController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = Roles.Administrador)]
     public async Task<IActionResult> Eliminar(int id)
     {
         var usuario = await _userManager.FindByIdAsync(id.ToString());
@@ -476,6 +519,7 @@ public class UsuarioController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Administrador)]
     public async Task<IActionResult> EliminarConfirmado(int id)
     {
         var usuario = await _userManager.FindByIdAsync(id.ToString());

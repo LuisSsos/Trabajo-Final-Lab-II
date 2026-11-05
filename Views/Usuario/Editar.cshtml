@@ -104,17 +104,34 @@
                             <hr class="my-2" />
                             <h3 class="h5 mb-3">Documentación médica</h3>
 
-                            <label class="form-label" for="ArchivoAptoMedico">
-                                Nuevo apto médico (opcional)
+                            @* Apto medico *@
+                            @if (!string.IsNullOrWhiteSpace(Model.AptoMedico))
+                            {
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <span class="fw-semibold">Apto médico:</span>
+                                    <a href="@Model.AptoMedico" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        Ver comprobante
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted small">El cliente no tiene un apto médico cargado.</p>
+                            }
+
+                            <label asp-for="ArchivoAptoMedico" class="form-label">
+                                @(string.IsNullOrWhiteSpace(Model.AptoMedico) ? "Apto médico (opcional)" : "Reemplazar apto médico (opcional)")
                             </label>
 
-                            <input type="file" id="ArchivoAptoMedico" name="ArchivoAptoMedico" class="form-control" accept=".pdf,.jpg,.jpeg,.png" />
+                            <input asp-for="ArchivoAptoMedico" class="form-control" accept=".pdf,.jpg,.jpeg,.png" />
+                            <span asp-validation-for="ArchivoAptoMedico" class="text-danger small"></span>
 
                             <div class="form-text">
-                                Formatos permitidos: PDF, JPG y PNG.
+                                Formatos permitidos: PDF, JPG y PNG. Máximo 5 MB.
                                 Si no seleccionás otro archivo, se conserva el actual.
                             </div>
                         </div>
+                    }
                     }
                 </div>
 

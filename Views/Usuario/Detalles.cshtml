@@ -45,27 +45,38 @@
 
             <hr />
 
-            <dl class="row mb-0">
-                <dt class="col-sm-3 py-2">Nombre</dt>
-                <dd class="col-sm-9 py-2">
-                    @(string.IsNullOrWhiteSpace(Model.Nombre) ? "-" : Model.Nombre)
-                </dd>
+            @if (Model.EsCliente)
+            {
+                <hr />
 
-                <dt class="col-sm-3 py-2">Apellido</dt>
-                <dd class="col-sm-9 py-2">
-                    @(string.IsNullOrWhiteSpace(Model.Apellido) ? "-" : Model.Apellido)
-                </dd>
+                <h3 class="h5 mb-3">Datos de cliente</h3>
 
-                <dt class="col-sm-3 py-2">Correo electrónico</dt>
-                <dd class="col-sm-9 py-2">
-                    @(string.IsNullOrWhiteSpace(Model.Email) ? "-" : Model.Email)
-                </dd>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3 py-2">DNI</dt>
+                    <dd class="col-sm-9 py-2">
+                        @(string.IsNullOrWhiteSpace(Model.Dni) ? "-" : Model.Dni)
+                    </dd>
 
-                <dt class="col-sm-3 py-2">Teléfono</dt>
-                <dd class="col-sm-9 py-2">
-                    @(string.IsNullOrWhiteSpace(Model.Telefono) ? "-" : Model.Telefono)
-                </dd>
-            </dl>
+                    <dt class="col-sm-3 py-2">Fecha de nacimiento</dt>
+                    <dd class="col-sm-9 py-2">
+                        @(Model.FechaNacimiento?.ToString("dd/MM/yyyy") ?? "-")
+                    </dd>
+
+                    <dt class="col-sm-3 py-2">Apto médico</dt>
+                    <dd class="col-sm-9 py-2">
+                        @if (!string.IsNullOrWhiteSpace(Model.AptoMedico))
+                        {
+                            <a href="@Model.AptoMedico" target="_blank" class="btn btn-sm btn-outline-primary">
+                                Ver comprobante
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sin apto médico</span>
+                        }
+                    </dd>
+                </dl>
+            }
 
             <hr class="my-4" />
 
