@@ -11,9 +11,14 @@
 
 <div class="mb-3">
     <label asp-for="PlanId" class="form-label"></label>
-    <select asp-for="PlanId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Planes" class="form-select">
+    <select asp-for="PlanId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Planes" class="form-select" id="PlanId">
         <option value="">Elegí un plan</option>
     </select>
+
+    <div id="precioPlan" class="form-text mt-2" style="display: none;">
+        Precio del plan: <strong id="montoPlan"></strong>
+    </div>
+
     <span asp-validation-for="PlanId" class="text-danger"></span>
 </div>
 
@@ -29,7 +34,8 @@
 {
     <div class="mb-3">
         <label asp-for="Estado" class="form-label"></label>
-        <select asp-for="Estado" asp-items="Html.GetEnumSelectList<Gimnasio.Models.EstadoMembresia>()" class="form-select"></select>
+        <select asp-for="Estado" asp-items="Html.GetEnumSelectList<Gimnasio.Models.EstadoMembresia>()"
+                class="form-select"></select>
         <span asp-validation-for="Estado" class="text-danger"></span>
     </div>
 }

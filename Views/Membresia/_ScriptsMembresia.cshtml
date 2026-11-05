@@ -51,4 +51,29 @@
             resultados.innerHTML = "";
         }
     });
+
+    const selectorPlan = document.getElementById("PlanId");
+    const precioPlan = document.getElementById("precioPlan");
+    const montoPlan = document.getElementById("montoPlan");
+
+    const preciosPlanes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PreciosPlanes));
+
+    function actualizarPrecio() {
+        const planId = selectorPlan.value;
+
+        if (planId && preciosPlanes[planId] !== undefined) {
+            montoPlan.textContent = new Intl.NumberFormat("es-AR", {
+                style: "currency",
+                currency: "ARS"
+            }).format(preciosPlanes[planId]);
+
+            precioPlan.style.display = "block";
+        } else {
+            precioPlan.style.display = "none";
+        }
+    }
+
+    selectorPlan.addEventListener("change", actualizarPrecio);
+
+    actualizarPrecio();
 </script>

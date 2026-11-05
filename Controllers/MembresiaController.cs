@@ -247,10 +247,22 @@ public class MembresiaController : Controller
 
     private async Task CargarPlanesAsync()
     {
-        var planes = await _contexto.Planes.OrderBy(p => p.Nombre).ToListAsync();
+        var planes = await _contexto.Planes
+            .OrderBy(p => p.Nombre)
+            .ToListAsync();
 
         ViewBag.Planes = planes
-            .Select(p => new SelectListItem($"{p.Nombre} ({p.DuracionDias} días)", p.Id.ToString()))
+            .Select(p => new SelectListItem
+            {
+                Text = $"{p.Nombre} ({p.DuracionDias} días)",
+                Value = p.Id.ToString(),
+                Disabled = false
+            })
             .ToList();
+
+        ViewBag.PreciosPlanes = planes.ToDictionary(
+            p => p.Id.ToString(),
+            p => p.Precio
+        );
     }
 }
