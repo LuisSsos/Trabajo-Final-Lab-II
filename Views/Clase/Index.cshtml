@@ -5,7 +5,9 @@
 <div id="app" data-listar-url="@Url.Action("ListarAjax", "Clase")"
      data-detalles-url="@Url.Action("Detalles", "Clase", new { id = "__id__" })"
      data-editar-url="@Url.Action("Editar", "Clase", new { id = "__id__" })"
-     data-eliminar-url="@Url.Action("Eliminar", "Clase", new { id = "__id__" })">
+     data-eliminar-url="@Url.Action("Eliminar", "Clase", new { id = "__id__" })"
+     data-crear-url="@Url.Action("Crear", "Clase")"
+     data-buscar-url="@Url.Action("BuscarEntrenadores", "Clase")">
 
     <form class="d-none">
         @Html.AntiForgeryToken()
@@ -19,9 +21,92 @@
             </p>
         </div>
 
-        <a asp-action="Crear" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" v-on:click="abrirCrear">
             Nueva clase
-        </a>
+        </button>
+    </div>
+
+    <div v-if="mensajeExito" class="alert alert-success">
+        {{ mensajeExito }}
+    </div>
+
+    <div v-if="mostrarFormulario" class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">{{ modo === 'crear' ? 'Nueva clase' : 'Editar clase' }}</h5>
+        </div>
+
+        <div class="card-body">
+            <div v-if="mensajeFormulario" class="alert alert-danger">
+                {{ mensajeFormulario }}
+            </div>
+
+            <form v-on:submit.prevent="guardar">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control"
+                               :class="{ 'is-invalid': errorDe('Nombre') }"
+                               v-model="formulario.nombre" />
+                        <div class="invalid-feedback">{{ errorDe('Nombre') }}</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Cupo máximo</label>
+                        <input type="number" min="1" max="500" class="form-control"
+                               :class="{ 'is-invalid': errorDe('CupoMaximo') }"
+                               v-model="formulario.cupoMaximo" />
+                        <div class="invalid-feedback">{{ errorDe('CupoMaximo') }}</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Descripción</label>
+                        <textarea rows="3" class="form-control"
+                                  :class="{ 'is-invalid': errorDe('Descripcion') }"
+                                  v-model="formulario.descripcion"></textarea>
+                        <div class="invalid-feedback">{{ errorDe('Descripcion') }}</div>
+                    </div>
+
+                    <div class="col-md-6 position-relative" ref="buscador">
+                        <label class="form-label">Entrenador</label>
+                        <input type="text" class="form-control" autocomplete="off"
+                               placeholder="Escribí el nombre o apellido del entrenador"
+                               :class="{ 'is-invalid': errorDe('EmpleadoId') }"
+                               v-model="formulario.nombreEntrenador"
+                               v-on:focus="buscarEntrenadores"
+                               v-on:input="programarBusqueda" />
+
+                        <div v-if="listaAbierta" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10;">
+                            <div v-if="buscandoEntrenadores" class="list-group-item text-muted">
+                                Buscando entrenadores...
+                            </div>
+                            <div v-else-if="entrenadores.length === 0" class="list-group-item text-muted">
+                                No se encontraron entrenadores
+                            </div>
+                            <template v-else>
+                                <button v-for="entrenador in entrenadores" :key="entrenador.id"
+                                        type="button" class="list-group-item list-group-item-action"
+                                        v-on:click="seleccionarEntrenador(entrenador)">
+                                    {{ entrenador.nombre }}
+                                </button>
+                            </template>
+                        </div>
+
+                        <div class="invalid-feedback">{{ errorDe('EmpleadoId') }}</div>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" :disabled="guardando">
+                        {{ guardando ? 'Guardando...' : (modo === 'crear' ? 'Crear clase' : 'Guardar cambios') }}
+                    </button>
+                    <button type="button" class="btn btn-secondary" :disabled="guardando" v-on:click="cancelar">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <div class="card shadow-sm">
@@ -66,9 +151,10 @@
                                         Ver
                                     </a>
 
-                                    <a :href="urlConId(urlEditar, clase.id)" class="btn btn-sm btn-outline-primary">
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                            v-on:click="abrirEditar(clase)">
                                         Editar
-                                    </a>
+                                    </button>
 
                                     <button type="button" class="btn btn-sm btn-outline-danger"
                                             :disabled="eliminandoId !== null" v-on:click="eliminarClase(clase)">
@@ -127,6 +213,17 @@
         const urlDetalles = elemento.dataset.detallesUrl;
         const urlEditar = elemento.dataset.editarUrl;
         const urlEliminar = elemento.dataset.eliminarUrl;
+        const urlCrear = elemento.dataset.crearUrl;
+        const urlBuscar = elemento.dataset.buscarUrl;
+
+        const formularioVacio = () => ({
+            id: 0,
+            nombre: '',
+            descripcion: '',
+            cupoMaximo: '',
+            empleadoId: '',
+            nombreEntrenador: ''
+        });
 
         Vue.createApp({
             data() {
@@ -139,13 +236,32 @@
                     eliminandoId: null,
                     urlDetalles,
                     urlEditar,
-                    urlEliminar
+                    urlEliminar,
+
+                    mostrarFormulario: false,
+                    modo: 'crear',
+                    formulario: formularioVacio(),
+                    guardando: false,
+                    erroresFormulario: {},
+                    mensajeFormulario: '',
+                    mensajeExito: '',
+
+                    entrenadores: [],
+                    listaAbierta: false,
+                    buscandoEntrenadores: false,
+                    temporizador: null
                 };
             },
 
             methods: {
                 urlConId(url, id) {
                     return url.replace('__id__', id);
+                },
+
+                obtenerToken() {
+                    return document.querySelector(
+                        'input[name="__RequestVerificationToken"]'
+                    )?.value;
                 },
 
                 async cargarClases(pagina = 1) {
@@ -187,6 +303,144 @@
 
                     this.cargarClases(pagina);
                 },
+
+                errorDe(campo) {
+                    const lista = this.erroresFormulario[campo];
+                    return lista && lista.length > 0 ? lista[0] : '';
+                },
+
+                abrirCrear() {
+                    this.modo = 'crear';
+                    this.formulario = formularioVacio();
+                    this.erroresFormulario = {};
+                    this.mensajeFormulario = '';
+                    this.mensajeExito = '';
+                    this.listaAbierta = false;
+                    this.mostrarFormulario = true;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                abrirEditar(clase) {
+                    this.modo = 'editar';
+                    this.formulario = {
+                        id: clase.id,
+                        nombre: clase.nombre,
+                        descripcion: clase.descripcion ?? '',
+                        cupoMaximo: clase.cupoMaximo,
+                        empleadoId: clase.empleadoId,
+                        nombreEntrenador: clase.nombreEntrenador
+                    };
+                    this.erroresFormulario = {};
+                    this.mensajeFormulario = '';
+                    this.mensajeExito = '';
+                    this.listaAbierta = false;
+                    this.mostrarFormulario = true;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                cancelar() {
+                    this.mostrarFormulario = false;
+                    this.listaAbierta = false;
+                },
+
+                async buscarEntrenadores() {
+                    this.listaAbierta = true;
+                    this.buscandoEntrenadores = true;
+
+                    try {
+                        const termino = encodeURIComponent(
+                            this.formulario.nombreEntrenador || ''
+                        );
+
+                        const respuesta = await fetch(`${urlBuscar}?termino=${termino}`);
+
+                        if (!respuesta.ok) {
+                            throw new Error('No se pudo buscar.');
+                        }
+
+                        this.entrenadores = await respuesta.json();
+                    } catch (error) {
+                        console.error(error);
+                        this.entrenadores = [];
+                    } finally {
+                        this.buscandoEntrenadores = false;
+                    }
+                },
+
+                programarBusqueda() {
+                    // si se vuelve a escribir, hay que elegir de nuevo de la lista
+                    this.formulario.empleadoId = '';
+                    clearTimeout(this.temporizador);
+                    this.temporizador = setTimeout(() => this.buscarEntrenadores(), 300);
+                },
+
+                seleccionarEntrenador(entrenador) {
+                    this.formulario.empleadoId = entrenador.id;
+                    this.formulario.nombreEntrenador = entrenador.nombre;
+                    this.listaAbierta = false;
+                },
+
+                async guardar() {
+                    if (this.guardando) {
+                        return;
+                    }
+
+                    this.guardando = true;
+                    this.mensajeFormulario = '';
+                    this.erroresFormulario = {};
+                    this.mensajeExito = '';
+
+                    try {
+                        const token = this.obtenerToken();
+
+                        if (!token) {
+                            throw new Error('No se encontró el token de seguridad.');
+                        }
+
+                        const esEdicion = this.modo === 'editar';
+
+                        const url = esEdicion
+                            ? this.urlConId(this.urlEditar, this.formulario.id)
+                            : urlCrear;
+
+                        const respuesta = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: new URLSearchParams({
+                                Id: this.formulario.id,
+                                Nombre: this.formulario.nombre,
+                                Descripcion: this.formulario.descripcion ?? '',
+                                CupoMaximo: this.formulario.cupoMaximo,
+                                EmpleadoId: this.formulario.empleadoId,
+                                NombreEntrenador: this.formulario.nombreEntrenador,
+                                __RequestVerificationToken: token
+                            })
+                        });
+
+                        const datos = await respuesta.json();
+
+                        if (!respuesta.ok || !datos.success) {
+                            this.erroresFormulario = datos.errores || {};
+                            this.mensajeFormulario =
+                                datos.mensaje || 'No se pudo guardar la clase.';
+                            return;
+                        }
+
+                        this.mensajeExito = datos.mensaje;
+                        this.mostrarFormulario = false;
+                        await this.cargarClases(this.paginaActual);
+                    } catch (error) {
+                        console.error(error);
+                        this.mensajeFormulario =
+                            error.message || 'Ocurrió un error al guardar la clase.';
+                    } finally {
+                        this.guardando = false;
+                    }
+                },
+
                 async eliminarClase(clase) {
                     const confirmar = window.confirm(
                         `¿Querés eliminar la clase "${clase.nombre}" y todos sus horarios asociados?`
@@ -198,14 +452,11 @@
 
                     this.eliminandoId = clase.id;
                     this.error = null;
+                    this.mensajeExito = '';
 
                     try {
                         const url = this.urlConId(this.urlEliminar, clase.id);
-
-                        // Obtener el token antifalsificación desde el formulario de la página.
-                        const token = document.querySelector(
-                            'input[name="__RequestVerificationToken"]'
-                        )?.value;
+                        const token = this.obtenerToken();
 
                         if (!token) {
                             throw new Error(
@@ -257,6 +508,21 @@
 
             mounted() {
                 this.cargarClases();
+
+                this.manejarClickFuera = (evento) => {
+                    const contenedor = this.$refs.buscador;
+
+                    if (contenedor && !contenedor.contains(evento.target)) {
+                        this.listaAbierta = false;
+                    }
+                };
+
+                document.addEventListener('click', this.manejarClickFuera);
+            },
+
+            beforeUnmount() {
+                document.removeEventListener('click', this.manejarClickFuera);
+                clearTimeout(this.temporizador);
             }
         }).mount('#app');
     })();
